@@ -4,6 +4,8 @@ Results are (so far) almost equal in speed. Machine here is WIN10 PRO, 8GB RAM, 
 
 Please see the [dbj changes](./dbj_changes.md) for more detailed changes made just to allow builds. No "clever " changes in the EASTL source whatsoever.
 
+> VS solution is in vs2019-test/eastl-test
+
 ---
 
 The original readme begins here

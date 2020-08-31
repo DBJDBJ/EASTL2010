@@ -3,14 +3,20 @@
 
 ## Built with Visual Studio 2019 
 
+C++17
+
 1. using CL
 2. using CLANG
 
-## vs2019-test main
+No other changed to any project properties have been done.
+
+## vs2019-test main.cpp
 
 has been changed .. not dramatically. Just to make it more functional and informative.
 
-## eacompilertraits.h
+## Details
+
+### eacompilertraits.h
 
 Line 333
 
