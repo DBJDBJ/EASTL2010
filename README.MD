@@ -1,13 +1,14 @@
-# comoparing EASTL form 10+ years ago with  MSVC STL 2020
+# comparing EASTL from 10+ years ago with  MSVC STL of today (2020)
 
-Result are (so far) almost equal in speed.
+Results are (so far) almost equal in speed. Machine here is WIN10 PRO, 8GB RAM, i5. Visual Studio is fully up to date.
 
-Please see the [dbj changes](./dbj_changes.md) for more detailed changes made just to allow bulds.
+Please see the [dbj changes](./dbj_changes.md) for more detailed changes made just to allow builds. No "clever " changes in the EASTL source whatsoever.
 
 ---
 
-> The original readme begins here
+The original readme begins here
 
+<font size="1" >
 
 ## About this library --
 
@@ -97,3 +98,5 @@ write your own stand alone allocators.)
 
 There's a makefile to compile the examples on linux. You'll need to
 build libeastl.a first, then go into example/ and just run 'make'.
+
+</font>
