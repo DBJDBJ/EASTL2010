@@ -1,4 +1,4 @@
-# Using EASTL 2010 in 2020
+# Why using EASTL 2010 in 2020
 
 We develop mainly Windows Server side components. We are building using the CL `/kernel` switch. We tend to use C11. But we are not C zealots. We use standard C++ to. For C++ code un-fortunately, '/kernel' switch means no MS STL. 
 
