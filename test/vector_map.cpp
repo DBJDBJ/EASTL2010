@@ -1,7 +1,6 @@
 #include <string>
 
-#include <cassert>
-#include <iostream>
+#include <assert.h>
 
 #include <EASTL/string.h>
 #include <EASTL/vector_map.h>

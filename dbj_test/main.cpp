@@ -14,7 +14,10 @@ static void performance_test(size_t loop_length, const char * str_specimen_ )
     clock_t start{};
     clock_t end{};
 
-#define double_diff_per_second(E_, S_)  (double( double(E_) - double(S_)) / double(CLOCKS_PER_SEC))
+    auto diff_per_second = [](double E_, double S_) constexpr ->double
+    {
+        return ((E_) - (S_)) / (CLOCKS_PER_SEC);
+    };
 
     // EA
 
@@ -30,7 +33,7 @@ static void performance_test(size_t loop_length, const char * str_specimen_ )
     }
 
     end = clock();
-    printf("%f sec\n", double_diff_per_second(end,start) );
+    printf("%f sec\n", diff_per_second(end,start) );
 
     // Standard
     printf("\nStandard STL     ");
@@ -45,11 +48,11 @@ static void performance_test(size_t loop_length, const char * str_specimen_ )
     }
 
     end = clock();
-    printf("%f sec\n", double_diff_per_second(end, start) );
+    printf("%f sec\n", diff_per_second(end, start) );
 }
 
 
-// #define SHORT_SPECIMEN
+#define SHORT_SPECIMEN
 
 #define OTHER_TESTS
 #ifdef OTHER_TESTS
