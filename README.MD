@@ -16,16 +16,20 @@ We include the [headers](./include/) and we add the cpp files in the [src folder
 
 ## Built with Visual Studio 2019 
 
-Using standard C++17 (although [dbj_test](./dbj_test/) is C++14)
+Standard C++17 (although [dbj_test](./dbj_test/) is C++14)
 
-1. using CL
-2. using CLANG
+Compiled with
+
+1. Visual C++ 2019   00435-60000-00000-AA768
+2. CLANG 10.0.1 (packaged with VS)
 
 No other changed to any project properties have been done.
 
-## vs2019-test main.cpp
+## main.cpp
 
-has been changed .. not dramatically. Just to make it more functional and informative.
+It has been changed .. not dramatically. Just to make it more functional and informative.
+
+Original intent was to compare the speed v.s. MS STL.
 
 ## Details
 
@@ -60,9 +64,10 @@ extern "C" {
 
 ### Vsnprintf requirement
 
-It seems it is not required. Excluded that implementation
+It seems not required. We excluded that implementation. In any case [it is very advisable](https://dbj.org/c-char8_t-is-broken/) to steer away from `char8_t`. 
 
 ```cpp
+// not in use any more
 #if 0
 extern "C" {
     // EASTL also wants us to define this (see string.h line 197)
@@ -80,8 +85,14 @@ extern "C" {
 
 ---
 
+(rare) changes in this repo are &copy; 2020 by dbj.systems
+
+Licence : [LICENCE_DBJ](https://dbj.org/license_dbj/)
+
+---
+
 <font size="1" >
-EASTL in this repo is
+EASTL in this repo is:
 
 Copyright (C) 2009 Electronic Arts, Inc.  All rights reserved.
 
