@@ -3,6 +3,8 @@
 #include <EASTL/internal/config.h>
 
 
+#if 0
+
 // EASTL expects us to define these, see allocator.h line 194
 void* operator new[](size_t size, const char* /* pName */,
                      int /* flags */, unsigned /* debugFlags */,
@@ -18,6 +20,7 @@ void* operator new[](size_t size, size_t alignment,
     return malloc(size);
 }
 
+
 // EASTL also wants us to define this (see string.h line 197)
 int Vsnprintf8(char8_t* pDestination, size_t n,
                const char8_t* pFormat, va_list arguments) {
@@ -27,3 +30,4 @@ int Vsnprintf8(char8_t* pDestination, size_t n,
         return vsnprintf(pDestination, n, pFormat, arguments);
 #endif
 }
+#endif // 0

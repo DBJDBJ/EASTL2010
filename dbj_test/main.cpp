@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "test.h"
+
 #include "EASTL/string.h"
 #include "EASTL/vector.h"
 
@@ -49,13 +51,28 @@ static void performance_test(size_t loop_length, const char * str_specimen_ )
 
 // #define SHORT_SPECIMEN
 
+#define OTHER_TESTS
+#ifdef OTHER_TESTS
+
+int eastl_test_vector();
+int eastl_test_vector_map();
+
+#endif // OTHER_TESTS
+
+
 int main(const int argc, char ** argv)
 {
+#ifdef OTHER_TESTS
+
+    eastl_test_vector();
+    eastl_test_vector_map();
+
+#endif // OTHER_TESTS
 
     constexpr auto dbj_test_loop_size_ = 1000000 * 10;
 
 // making this laqrger than small size optimization (SSO) value 
-// makes very large difference in results
+// makes very large difference in comparisons with EASTL
 #ifdef SHORT_SPECIMEN
 #define DBJ_STRING_SPECIMEN "Hello"
 #else
@@ -79,7 +96,7 @@ int main(const int argc, char ** argv)
 #endif
 
 
-    printf("\n\nSpecimen: \"%s\" (length: %d)\n", DBJ_STRING_SPECIMEN, strlen(DBJ_STRING_SPECIMEN));
+    printf("\n\nSpecimen: \"%s\" (length: %zd)\n", DBJ_STRING_SPECIMEN, strlen(DBJ_STRING_SPECIMEN));
     printf("\n\nTest Loop length: %03.1f milions\n\n", double(dbj_test_loop_size_) / 1000000 );
 
     try {
@@ -98,38 +115,3 @@ int main(const int argc, char ** argv)
 
 
 }
-
-
-
-// needed by EASTL - taken from EASTL's example/example1.cpp
-
-// EASTL expects us to define these, see allocator.h line 194
-void* operator new[](size_t size, const char* pName, int flags,
-	unsigned debugFlags, const char* file, int line)
-{
-	// return malloc(size);
-	return malloc(size);
-}
-
-void* operator new[](size_t size, size_t alignment, size_t alignmentOffset,
-	const char* pName, int flags, unsigned debugFlags, const char* file, int line)
-{
-	// this allocator doesn't support alignment
-	EASTL_ASSERT(alignment <= 8);
-    // return malloc(size);
-    return malloc(size);
-}
-
-#if 0
-extern "C" {
-    // EASTL also wants us to define this (see string.h line 197)
-    int Vsnprintf8(char8_t* pDestination, size_t n, const char8_t* pFormat, va_list arguments)
-    {
-#ifdef _MSC_VER
-        return _vsnprintf(pDestination, n, pFormat, arguments);
-#else
-        return vsnprintf(pDestination, n, pFormat, arguments);
-#endif
-    }
-}
-#endif // 0

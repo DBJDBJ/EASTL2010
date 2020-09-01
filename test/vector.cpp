@@ -5,8 +5,6 @@
 #include <EASTL/string.h>
 #include <EASTL/vector.h>
 
-#include "test.hpp"
-
 #ifdef EA_COMPILER_HAS_MOVE_SEMANTICS
 
 void move_push_back() {
@@ -36,9 +34,10 @@ void move_constructor() {
 
 #endif
 
-int main() {
+int eastl_test_vector () {
 #ifdef EA_COMPILER_HAS_MOVE_SEMANTICS
   move_push_back();
   move_constructor();
 #endif
+  return EXIT_SUCCESS;
 }

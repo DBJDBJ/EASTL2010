@@ -1,104 +1,69 @@
-# comparing EASTL from 10+ years ago with  MSVC STL of today (2020)
+# Perusing EASTL 2015 in 2020
 
-Results are (so far) almost equal in speed. Machine here is WIN10 PRO, 8GB RAM, i5. Visual Studio is fully up to date.
+> Abstract: so far all is dandy (in the land of candy)
 
-Please see the [dbj changes](./dbj_changes.md) for more detailed changes made just to allow builds. No "clever " changes in the EASTL source whatsoever.
+## Built with Visual Studio 2019 
 
-> VS solution is in vs2019-test/eastl-test
+C++17
 
----
+1. using CL
+2. using CLANG
 
-The original readme begins here
+No other changed to any project properties have been done.
 
-<font size="1" >
+## vs2019-test main.cpp
 
-## About this library --
+has been changed .. not dramatically. Just to make it more functional and informative.
 
-At http://gpl.ea.com you can download some open-source packages in zip
-files.  Deep inside some of these zip files is C++ code for the EASTL
-library, a replacement for the STL. I'm not sure if these packages
-include the complete library, but it seems to have all of the
-fundamentals.
+## Details
 
-This github project only exists to offer up these files in a more
-convenient way, under the terms of EA's license. License terms can be
-found embedded in the source files.
+### eacompilertraits.h
 
-If you're just browsing, then most of the good stuff is under
-include/EASTL/
+Line 333
 
-These files are only *part* of the actual EASTL library. According to Paul
-Pedriana, only 50-60% of EASTL is officially published; the remainder may be
-published sometime in the future. There's also a large suite of unit tests and
-benchmarks which are not yet published.
+```cpp
+// Make sure we get no macro naming conflicts
+// DBJ added the following line
+#if ! defined(EA_COMPILER_CLANG)
+#  undef CLANG_ALIGNED 
+#  undef CLANG_PACKED 
+#endif
+```
 
-## Notes --
+That makes build possible with CLANG 10.x, as packaged under Visual Studio 2019. Problem was in `fixedpool.h` lines 109 to 145.
 
-As per document N2271, this copy of the EASTL is highly
-incomplete. Notably things such as deques are missing, as well as the
-entirety of the intrusive containers library and many other things. I
-guess as EA continues to release source code I will try to update this
-repository with new source code and changes (and hopefully EA will
-release more in the future.)
+### string.h
 
-## Changes --
+Line 200
 
-This repository contains a few examples of EASTL usage as well as a
-makefile on linux for compiling the source code (under 'src') into an
-archive to link against later for convenience.
+added `extern "C"` 
 
-Also, it contains modifications (by me, Austin Seipp, 2010) to the
-EASTL source code to support the Clang compiler. At least v2.8 is
-necessary as it has C++03 support. I state these changes are released
-back to the community under the same license EA has given its source
-code - see the individual files under include/ and src/ for their
-licensing terms.
+```cpp
+extern "C" {
+    extern int Vsnprintf8(char8_t* pDestination, size_t n, const char8_t* pFormat, va_list arguments);
+    extern int Vsnprintf16(char16_t* pDestination, size_t n, const char16_t* pFormat, va_list arguments);
+    extern int Vsnprintf32(char32_t* pDestination, size_t n, const char32_t* pFormat, va_list arguments);
+}
+```
 
-By default, if you use the makefile on linux to build a 'libeastl.a'
-(see 'Usage' below) it will attempt to use clang++ to compile the
-source. You can change this by setting the CC variable in
-'Makefile.top' to g++ or whatever compilers EASTL supports (see
-include/EABase/config/eacompiler.h)
+### main.cpp
 
-If you use clang to compile the examples and the source code, and you
-follow clang's development (through its SVN) repository, please be
-aware of this bug and use the latest trunk copy:
+Line 121. 
 
-http://llvm.org/bugs/show_bug.cgi?id=8284
+Excluded that implementation
 
-I do not think this bug exists in the standard release of LLVM/Clang
-2.8.
-
-## Usage --
-
-Add the 'include' directory to your include path, and the contents of
-'src' to your project's source files.
-
-Alternatively, if you're on linux, you can run 'make' at the top level
-directory and it will generate a 'libeastl.a' that you can link
-against. Just put it in your linker's library path and 'include' in
-your include path and you should be set.  If you do this, you can
-control compilation flags and the output binary archive file via
-'Makefile.top'. Check the EABase and EASTL source code (in particular,
-include/EABase/config/* and include/EASTL/internal/config.h) for
-compilation flags.
-
-To use EASTL, you will need to define several functions, particularly
-allocator functions. If you do not need a custom allocator, you must
-define new[] and delete[] for the basic built in allocator - see
-example/example1.cpp for a trivial example. You must also define
-Vsnprintf and possibly other things.
-
-If you wish to use a custom allocator, you must define a custom allocator
-class. Refer to document N2271 and include/EASTL/allocator.h for the
-interface allocators must support, and the custom allocator example
-located under example/custom_allocator.cpp for more (in particular,
-the custom allocator is different from the default eastl::allocator
-only in that it uses posix_memalign to respect alignment
-requirements. Otherwise it's a direct copy and an example of how to
-write your own stand alone allocators.)
-
-There's a makefile to compile the examples on linux. You'll need to
-build libeastl.a first, then go into example/ and just run 'make'.
-
-</font>
+```cpp
+#if 0
+extern "C" {
+    // EASTL also wants us to define this (see string.h line 197)
+    int Vsnprintf8(char8_t* pDestination, size_t n, const char8_t* pFormat, va_list arguments)
+    {
+#ifdef _MSC_VER
+        return _vsnprintf(pDestination, n, pFormat, arguments);
+#else
+        return vsnprintf(pDestination, n, pFormat, arguments);
+#endif
+    }
+}
+#endif // 0
+```

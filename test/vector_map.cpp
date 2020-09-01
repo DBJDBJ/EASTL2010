@@ -1,7 +1,5 @@
 #include <string>
 
-#include "test.hpp"
-
 #include <cassert>
 #include <iostream>
 
@@ -450,7 +448,7 @@ static void get_allocator() {
   mymap.get_allocator().deallocate(p,5);
 }
 
-int main() {
+int eastl_test_vector_map () {
   constructor();
   assign_operator();
   begin_end();
@@ -470,4 +468,6 @@ int main() {
   upper_lower_bound();
   equal_range();
   get_allocator();
+
+  return EXIT_SUCCESS;
 }
