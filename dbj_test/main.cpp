@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <time.h>
 
+#ifndef _KERNEL_MODE
 #include <string>
 #include <vector>
+#endif // _KERNEL_MODE
 
 #include "test.h"
 
@@ -35,6 +37,8 @@ static void performance_test(size_t loop_length, const char * str_specimen_ )
     end = clock();
     printf("%f sec\n", diff_per_second(end,start) );
 
+
+#ifndef _KERNEL_MODE
     // Standard
     printf("\nStandard STL     ");
 
@@ -49,6 +53,7 @@ static void performance_test(size_t loop_length, const char * str_specimen_ )
 
     end = clock();
     printf("%f sec\n", diff_per_second(end, start) );
+#endif // _KERNEL_MODE
 }
 
 
@@ -65,13 +70,6 @@ int eastl_test_vector_map();
 
 int main(const int argc, char ** argv)
 {
-#ifdef OTHER_TESTS
-
-    eastl_test_vector();
-    eastl_test_vector_map();
-
-#endif // OTHER_TESTS
-
     constexpr auto dbj_test_loop_size_ = 1000000 * 10;
 
 // making this laqrger than small size optimization (SSO) value 
@@ -82,11 +80,16 @@ int main(const int argc, char ** argv)
 #define DBJ_STRING_SPECIMEN "Hello young fellow from the shallow, why are you so mellow? Perhaps thy friend is the badfellow? "
 #endif
 
+#ifdef _KERNEL_MODE
+    printf("\n\n******************* KERNEL MODE ****************************\n\n");
+#endif // _KERNEL_MODE
+
+
 #ifdef __clang__
-    printf("\nCLANG ");
+    printf("\n\nCLANG ");
     printf("\n\n __VERSION__ : %d\n", __VERSION__);
 #else
-    printf("\nCL    ");
+    printf("\n\nCL    ");
     printf("\n\n _MSC_FULL_VER : %d\n", _MSC_FULL_VER);
 #endif
 
@@ -102,8 +105,11 @@ int main(const int argc, char ** argv)
     printf("\n\nSpecimen: \"%s\" (length: %zd)\n", DBJ_STRING_SPECIMEN, strlen(DBJ_STRING_SPECIMEN));
     printf("\n\nTest Loop length: %03.1f milions\n\n", double(dbj_test_loop_size_) / 1000000 );
 
+#ifndef _KERNEL_MODE
     try {
+#endif // _KERNEL_MODE
         performance_test(dbj_test_loop_size_, DBJ_STRING_SPECIMEN);
+#ifndef _KERNEL_MODE
     }
     catch (std::exception& x_)
     {
@@ -113,6 +119,14 @@ int main(const int argc, char ** argv)
     {
         printf("\nUnknown exception ...?");
     }
+#endif // _KERNEL_MODE
+
+#ifdef OTHER_TESTS
+
+    eastl_test_vector();
+    eastl_test_vector_map();
+
+#endif // OTHER_TESTS
 
     printf("\n\nDone ...\n\n");
 
