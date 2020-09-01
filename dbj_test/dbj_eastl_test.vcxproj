@@ -19,12 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\custom\custom_allocator.cpp" />
     <ClCompile Include="..\src\allocator.cpp" />
     <ClCompile Include="..\src\assert.cpp" />
     <ClCompile Include="..\src\fixed_pool.cpp" />
     <ClCompile Include="..\src\hashtable.cpp" />
     <ClCompile Include="..\src\red_black_tree.cpp" />
     <ClCompile Include="..\src\string.cpp" />
+    <ClCompile Include="..\test\test_hash_map_string.cpp" />
     <ClCompile Include="..\test\vector.cpp" />
     <ClCompile Include="..\test\vector_map.cpp" />
     <ClCompile Include="main.cpp" />

@@ -1,15 +1,19 @@
 #pragma once
-#include <cstdio>
-#include <cstdlib>
+
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <stdio.h>
+#include <stdlib.h>
 #include <EASTL/internal/config.h>
 
 // EASTL expects us to define these, see allocator.h line 194
-void* operator new[](size_t size, const char* /* pName */,
+inline void* operator new[](size_t size, const char* /* pName */,
     int /* flags */, unsigned /* debugFlags */,
     const char* /* file */, int /* line */) {
         return malloc(size);
 }
-void* operator new[](size_t size, size_t alignment,
+
+inline void* operator new[](size_t size, size_t alignment,
     size_t /* alignmentOffset */, const char* /* pName */,
     int /* flags */, unsigned /* debugFlags */,
     const char* /* file */, int /* line */) {
@@ -19,9 +23,8 @@ void* operator new[](size_t size, size_t alignment,
 }
 
 
-#if 0
 // EASTL also wants us to define this (see string.h line 197)
-int Vsnprintf8(char8_t* pDestination, size_t n,
+extern "C" inline int Vsnprintf8(char8_t* pDestination, size_t n,
     const char8_t* pFormat, va_list arguments) {
 #ifdef _MSC_VER
     return _vsnprintf(pDestination, n, pFormat, arguments);
@@ -29,4 +32,3 @@ int Vsnprintf8(char8_t* pDestination, size_t n,
     return vsnprintf(pDestination, n, pFormat, arguments);
 #endif
 }
-#endif // 0

@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <stdio.h>
 #include <time.h>
 
@@ -62,15 +64,18 @@ static void performance_test(size_t loop_length, const char * str_specimen_ )
 #define OTHER_TESTS
 #ifdef OTHER_TESTS
 
+int test_custom_allocator();
 int eastl_test_vector();
 int eastl_test_vector_map();
+int test_hash_map_string();
+int test_malloc_aligned();
 
 #endif // OTHER_TESTS
 
 
 int main(const int argc, char ** argv)
 {
-    constexpr auto dbj_test_loop_size_ = 1000000 * 10;
+    constexpr auto dbj_test_loop_size_ = 1000000 / 10;
 
 // making this laqrger than small size optimization (SSO) value 
 // makes very large difference in comparisons with EASTL
@@ -123,8 +128,11 @@ int main(const int argc, char ** argv)
 
 #ifdef OTHER_TESTS
 
+    test_malloc_aligned();
+    test_custom_allocator();
     eastl_test_vector();
     eastl_test_vector_map();
+    test_hash_map_string();
 
 #endif // OTHER_TESTS
 
