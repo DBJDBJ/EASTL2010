@@ -6,7 +6,7 @@ We use [EASTL](https://github.com/electronicarts/EASTL) library instead of C++ s
 
 Actually on WIN10 PRO, 8GB RAM, i5, machine is it consistently faster than MS STL. For longer strings. ( more than 16 chars in length ).
 
-std::allocator turns out to be (on of the) key issue. Here there is `eastl::allocator` which is faster by design.  And you are free to use your own.
+**std::allocator** turns out to be (one of the) key issues. Here there is `eastl::allocator` which is faster by design.  And you are free to use your own.
 
 All such things are infinitely simpler to change vs MS STL.
 
