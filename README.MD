@@ -1,10 +1,22 @@
-# Perusing EASTL 2015 in 2020
+# Using EASTL 2010 in 2020
 
-> Abstract: so far all is dandy (in the land of candy)
+We develop mainly Windows Server side components. We are building using the CL `/kernel` switch. We tend to use C11. But we are not C zealots. We use standard C++ to. For C++ code un-fortunately, '/kernel' switch means no MS STL. 
+
+We use [EASTL](https://github.com/electronicarts/EASTL) library instead of C++ std lib. Actually, what was EASTL 10+ years ago. And it works well; it is simple and fast. 
+
+Actually on WIN10 PRO, 8GB RAM, i5, machine is it consistently faster than MS STL. For longer strings. ( more than 16 chars in length ).
+
+std::allocator turns out to be (on of the) key issue. Here there is `eastl::allocator` which is faster by design.  And you are free to use your own.
+
+All such things are infinitely simpler to change vs MS STL.
+
+## How to use
+
+We include the [headers](./include/) and we add the cpp files in the [src folder](./src/) . We do not build a library or a DLL to use this. Anyway you know the DLL written in C++ is very elusive prey to catch. And we have no time for that hunt.
 
 ## Built with Visual Studio 2019 
 
-C++17
+Using standard C++17 (although [dbj_test](./dbj_test/) is C++14)
 
 1. using CL
 2. using CLANG
@@ -46,11 +58,9 @@ extern "C" {
 }
 ```
 
-### main.cpp
+### Vsnprintf requirement
 
-Line 121. 
-
-Excluded that implementation
+It seems it is not required. Excluded that implementation
 
 ```cpp
 #if 0
@@ -67,3 +77,35 @@ extern "C" {
 }
 #endif // 0
 ```
+
+---
+
+<font size="1" >
+EASTL in this repo is
+
+Copyright (C) 2009 Electronic Arts, Inc.  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1.  Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+2.  Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+3.  Neither the name of Electronic Arts, Inc. ("EA") nor the names of
+    its contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY ELECTRONIC ARTS AND ITS CONTRIBUTORS "AS IS" AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL ELECTRONIC ARTS OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+</font>
