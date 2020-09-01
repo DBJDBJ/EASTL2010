@@ -47,27 +47,40 @@ static void performance_test(size_t loop_length, const char * str_specimen_ )
 }
 
 
+// #define SHORT_SPECIMEN
+
 int main(const int argc, char ** argv)
 {
 
-    enum { dbj_test_loop_size_ = 1000000 * 10 };
+    constexpr auto dbj_test_loop_size_ = 1000000 * 10;
 
 // making this laqrger than small size optimization (SSO) value 
 // makes very large difference in results
-// #define DBJ_STRING_SPECIMEN "Hello"
-#define DBJ_STRING_SPECIMEN "Hello young fellow from the shallow, why are you so mellow? Perhaps thy guilty conciousness is the badfellow? "
-
-#ifdef _DEBUG
-    printf("\nDEBUG build");
+#ifdef SHORT_SPECIMEN
+#define DBJ_STRING_SPECIMEN "Hello"
 #else
-    printf("\nRELEASE build");
+#define DBJ_STRING_SPECIMEN "Hello young fellow from the shallow, why are you so mellow? Perhaps thy friend is the badfellow? "
 #endif
 
-    printf("\n [version %s] __cplusplus: %lu, _MSC_FULL_VER : %d\n", 
-        __TIMESTAMP__ , __cplusplus, _MSC_FULL_VER);
+#ifdef __clang__
+    printf("\nCLANG ");
+    printf("\n\n __VERSION__ : %d\n", __VERSION__);
+#else
+    printf("\nCL    ");
+    printf("\n\n _MSC_FULL_VER : %d\n", _MSC_FULL_VER);
+#endif
 
-    printf("\nSpecimen: \"%s\" (length: %d)\n", DBJ_STRING_SPECIMEN, strlen(DBJ_STRING_SPECIMEN));
-    printf("\nTest Loop length: %03.1f milions\n\n", double(dbj_test_loop_size_) / 1000000 );
+    printf("\n% s[version % s]  \n\n__cplusplus: %lu ", argv[0], __TIMESTAMP__, __cplusplus);
+
+#ifdef _DEBUG
+    printf("\tDEBUG build");
+#else
+    printf("\tRELEASE build");
+#endif
+
+
+    printf("\n\nSpecimen: \"%s\" (length: %d)\n", DBJ_STRING_SPECIMEN, strlen(DBJ_STRING_SPECIMEN));
+    printf("\n\nTest Loop length: %03.1f milions\n\n", double(dbj_test_loop_size_) / 1000000 );
 
     try {
         performance_test(dbj_test_loop_size_, DBJ_STRING_SPECIMEN);
@@ -87,31 +100,36 @@ int main(const int argc, char ** argv)
 }
 
 
+
 // needed by EASTL - taken from EASTL's example/example1.cpp
-//
 
 // EASTL expects us to define these, see allocator.h line 194
 void* operator new[](size_t size, const char* pName, int flags,
 	unsigned debugFlags, const char* file, int line)
 {
 	// return malloc(size);
-	return calloc(1,size);
+	return malloc(size);
 }
+
 void* operator new[](size_t size, size_t alignment, size_t alignmentOffset,
 	const char* pName, int flags, unsigned debugFlags, const char* file, int line)
 {
 	// this allocator doesn't support alignment
 	EASTL_ASSERT(alignment <= 8);
     // return malloc(size);
-    return calloc(1, size);
+    return malloc(size);
 }
 
-// EASTL also wants us to define this (see string.h line 197)
-int Vsnprintf8(char8_t* pDestination, size_t n, const char8_t* pFormat, va_list arguments)
-{
+#if 0
+extern "C" {
+    // EASTL also wants us to define this (see string.h line 197)
+    int Vsnprintf8(char8_t* pDestination, size_t n, const char8_t* pFormat, va_list arguments)
+    {
 #ifdef _MSC_VER
-	return _vsnprintf(pDestination, n, pFormat, arguments);
+        return _vsnprintf(pDestination, n, pFormat, arguments);
 #else
-	return vsnprintf(pDestination, n, pFormat, arguments);
+        return vsnprintf(pDestination, n, pFormat, arguments);
 #endif
+    }
 }
+#endif // 0

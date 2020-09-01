@@ -197,9 +197,11 @@ const eastl_size_t EASTL_STRING_INITIAL_CAPACITY = 8;
 // can deal with C99 standard return values or Microsoft non-standard return
 // values but act more efficiently if implemented via the C99 style.
 
-extern int Vsnprintf8 (char8_t*  pDestination, size_t n, const char8_t*  pFormat, va_list arguments);
-extern int Vsnprintf16(char16_t* pDestination, size_t n, const char16_t* pFormat, va_list arguments);
-extern int Vsnprintf32(char32_t* pDestination, size_t n, const char32_t* pFormat, va_list arguments);
+extern "C" {
+    extern int Vsnprintf8(char8_t* pDestination, size_t n, const char8_t* pFormat, va_list arguments);
+    extern int Vsnprintf16(char16_t* pDestination, size_t n, const char16_t* pFormat, va_list arguments);
+    extern int Vsnprintf32(char32_t* pDestination, size_t n, const char32_t* pFormat, va_list arguments);
+}
 
 namespace eastl
 {
