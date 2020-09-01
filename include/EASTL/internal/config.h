@@ -1111,7 +1111,8 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef EASTL_ALLOCATOR_EXPLICIT_ENABLED
-    #define EASTL_ALLOCATOR_EXPLICIT_ENABLED 0
+// DBJ changed from 0 to 1
+    #define EASTL_ALLOCATOR_EXPLICIT_ENABLED 1
 #endif
 
 #if EASTL_ALLOCATOR_EXPLICIT_ENABLED
@@ -1143,6 +1144,15 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 //       doesn't provide a specific one.
 //
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+This is* very* important.Inability to do this in the std lib breaks the whole C++ community 
+into pro and ante, std lib fractions. The rift which probably will not heal.
+https://thephd.github.io/freestanding-noexcept-allocators-vector-memory-hole
+
+EASTL is one known example of the noexcept allocator.
+In EASTL 2010 that was still not understood :)
+*/
 
 // namespace eastl
 // {

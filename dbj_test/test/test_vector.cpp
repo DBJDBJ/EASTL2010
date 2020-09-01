@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include "../dbj_common.h"
 
 #include <EASTL/string.h>
 #include <EASTL/vector.h>

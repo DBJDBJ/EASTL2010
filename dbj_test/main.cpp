@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+
 
 #include <stdio.h>
 #include <time.h>
@@ -8,7 +8,9 @@
 #include <vector>
 #endif // _KERNEL_MODE
 
-#include "test.h"
+#include "dbj_common.h"
+
+
 
 #include "EASTL/string.h"
 #include "EASTL/vector.h"

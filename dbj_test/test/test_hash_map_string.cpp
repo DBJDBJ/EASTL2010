@@ -1,7 +1,7 @@
 
 // basic usage of some EASTL containers.
 
-#define _CRT_SECURE_NO_WARNINGS
+#include "../dbj_common.h"
 
 #include <EASTL/hash_map.h>
 #include <EASTL/string.h>

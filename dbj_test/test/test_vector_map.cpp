@@ -1,13 +1,11 @@
-#include <string>
 
 #include <assert.h>
+#include "../dbj_common.h"
 
 #include <EASTL/string.h>
 #include <EASTL/vector_map.h>
 
-
 using eastl::string;
-
 
 bool fncomp (char lhs, char rhs) {return lhs<rhs;}
 

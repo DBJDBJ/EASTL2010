@@ -23,9 +23,55 @@ Compiled with
 1. Visual C++ 2019   00435-60000-00000-AA768
 2. CLANG 10.0.1 (packaged with VS)
 
-No other changed to any project properties have been done.
+No other changed to any project properties have been done. In any case please look into the [VS project provided](./dbj_test/) for an standard build sample, with few tests.
 
-## main.cpp
+### Noexcept Allocators
+
+This is *very* important. Inability to do this in the std lib [breaks the whole C++ community](https://thephd.github.io/freestanding-noexcept-allocators-vector-memory-hole) into two pro and ante, std lib two fractions. The rift which probably will not heal. EASTL 2020 is one known example. In EASTL 2010 that was still not understood :)
+
+But we do not care since we do not have to include from some base allocator neither we have to confirm to 'yes' or 'no' noexcept methods on custom allocators we develop. Thus please think of your custom allocator to be used in this lib as:
+
+```cpp
+namespace my
+{
+    // yours is all noexcept allocator "interface"
+    // the std lib dream ...
+class allocator
+    {
+    explicit allocator(const char* pName = NULL) noexcept ;
+
+    void* allocate(size_t n, int flags = 0) noexcept ;
+    void* allocate(size_t n, size_t alignment, size_t offset, int flags = 0) noexcept ;
+    void  deallocate(void* p, size_t n) noexcept ;
+
+    const char* get_name() const noexcept ;
+    void        set_name(const char* pName) noexcept ;
+};
+
+// This is part of EASTL mechanism to replace the default allocator
+    allocator* GetDefaultAllocator(); 
+}
+```
+Look into `./custom/custom_allocator.h` for an example. Note: default allocator is so default it is best avoided.
+
+### EASTL_ALLOCATOR_EXPLICIT
+
+File config.h , line # 1118
+
+```cpp
+#ifndef EASTL_ALLOCATOR_EXPLICIT_ENABLED
+// DBJ changed from 0 to 1
+    #define EASTL_ALLOCATOR_EXPLICIT_ENABLED 1
+#endif
+
+#if EASTL_ALLOCATOR_EXPLICIT_ENABLED
+    #define EASTL_ALLOCATOR_EXPLICIT explicit
+#else
+    #define EASTL_ALLOCATOR_EXPLICIT 
+#endif
+```
+
+### main.cpp
 
 It has been changed .. not dramatically. Just to make it more functional and informative.
 
@@ -47,41 +93,6 @@ Line 333
 ```
 
 That makes build possible with CLANG 10.x, as packaged under Visual Studio 2019. Problem was in `fixedpool.h` lines 109 to 145.
-
-### string.h
-
-Line 200
-
-added `extern "C"` 
-
-```cpp
-extern "C" {
-    extern int Vsnprintf8(char8_t* pDestination, size_t n, const char8_t* pFormat, va_list arguments);
-    extern int Vsnprintf16(char16_t* pDestination, size_t n, const char16_t* pFormat, va_list arguments);
-    extern int Vsnprintf32(char32_t* pDestination, size_t n, const char32_t* pFormat, va_list arguments);
-}
-```
-
-### Vsnprintf requirement
-
-It seems not required. We excluded that implementation. In any case [it is very advisable](https://dbj.org/c-char8_t-is-broken/) to steer away from `char8_t`. 
-
-```cpp
-// not in use any more
-#if 0
-extern "C" {
-    // EASTL also wants us to define this (see string.h line 197)
-    int Vsnprintf8(char8_t* pDestination, size_t n, const char8_t* pFormat, va_list arguments)
-    {
-#ifdef _MSC_VER
-        return _vsnprintf(pDestination, n, pFormat, arguments);
-#else
-        return vsnprintf(pDestination, n, pFormat, arguments);
-#endif
-    }
-}
-#endif // 0
-```
 
 ---
 
