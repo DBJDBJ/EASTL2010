@@ -1,24 +1,26 @@
 # Why using EASTL 2010 in 2020
 
-We develop mainly Windows Server side components. We are building using the CL `/kernel` switch. We tend to use C11. But we are not C zealots. We use standard C++ to. For C++ code un-fortunately, '/kernel' switch means no MS STL. 
+We develop mainly Windows Server side components. We are building using the CL compiler `/kernel` switch. We tend to use C11. But we are not C zealots. We use standard C++ too. For C++ code, '/kernel' switch means no MS STL. 
 
 We use [EASTL](https://github.com/electronicarts/EASTL) library instead of C++ std lib. Actually, what was EASTL 10+ years ago. And it works well; it is simple and fast. 
 
-Actually on WIN10 PRO, 8GB RAM, i5, machine is it consistently faster than MS STL. For longer strings. ( more than 16 chars in length ).
+Actually on WIN10 PRO, 8GB RAM, i5, machine it is consistently faster than MS STL. For longer strings. MS STL uses SSO (Small Size Optimization) in their string.
 
-**std::allocator** turns out to be (one of the) key issues. Here there is `eastl::allocator` which is faster by design.  And you are free to use your own.
+By 2020 **std::allocator** turns out to be (one of the) key issues weighing down the std lib. In here there is `eastl::allocator` which is faster by design.  And you are free to use your own. In a very easy way. No exceptions, no problems.
 
-All such things are infinitely simpler to change vs MS STL.
+All such things are infinitely simpler to change vs MS STL. We will update this readme regularly with new "findings".
 
 ## How to use
 
-We include the [headers](./include/) and we add the cpp files in the [src folder](./src/) . We do not build a library or a DLL to use this. Anyway you know the DLL written in C++ is very elusive prey to catch. And we have no time for that hunt.
+We include the [headers](./include/) and we add the cpp files in the [src folder](./src/) . We do not build a library or a DLL to use this. Anyway you know the DLL written in C++ is very elusive prey to catch. And we have no time for that hunt. 
+
+Windows service or a driver is kind-of-a DLL. Which is fine since we use this code only internaly.
 
 ## Built with Visual Studio 2019 
 
-Standard C++17 (although [dbj_test](./dbj_test/) is C++14)
+Standard C++17 
 
-Compiled with
+Compiled with Visual Studio 2019 and
 
 1. Visual C++ 2019   00435-60000-00000-AA768
 2. CLANG 10.0.1 (packaged with VS)
@@ -27,9 +29,9 @@ No other changed to any project properties have been done. In any case please lo
 
 ### Noexcept Allocators
 
-This is *very* important. Inability to do this in the std lib [breaks the whole C++ community](https://thephd.github.io/freestanding-noexcept-allocators-vector-memory-hole) into two pro and ante, std lib two fractions. The rift which probably will not heal. EASTL 2020 is one known example. In EASTL 2010 that was still not understood :)
+This is *very* important. Inability to do this in the std lib [breaks the whole C++ community](https://thephd.github.io/freestanding-noexcept-allocators-vector-memory-hole) into two pro and ante, std lib fractions. The rift which probably will not heal. EASTL 2020 is one known example. In EASTL 2010 that was still not understood :)
 
-But we do not care since we do not have to include from some base allocator neither we have to confirm to 'yes' or 'no' noexcept methods on custom allocators we develop. Thus please think of your custom allocator to be used in this lib as:
+But we do not care since we do not have to include from some base allocator neither. Thus please think of your custom allocator to be used in this lib as this synopsis shows:
 
 ```cpp
 namespace my
@@ -52,7 +54,7 @@ class allocator
     allocator* GetDefaultAllocator(); 
 }
 ```
-Look into `./custom/custom_allocator.h` for an example. Note: default allocator is so default it is best avoided.
+Look into `./custom/custom_allocator.h` for an example. Note: default allocator is so default it is best avoided. It uses new and delete operators.
 
 ### EASTL_ALLOCATOR_EXPLICIT
 
@@ -76,8 +78,6 @@ File config.h , line # 1118
 It has been changed .. not dramatically. Just to make it more functional and informative.
 
 Original intent was to compare the speed v.s. MS STL.
-
-## Details
 
 ### eacompilertraits.h
 
