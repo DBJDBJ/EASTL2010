@@ -1,17 +1,5 @@
 #pragma once
 
-#define _XOPEN_SOURCE 600
-#define EASTL_USER_DEFINED_ALLOCATOR // Must declare this to avoid new[]/delete[] prototypes in allocator.h
-#define EASTL_ALLOCATOR_DEFAULT_NAME "dbj_alligned_allocator"
-
-// these macros are important
-
-#undef EASTLAllocatorType
-#define EASTLAllocatorType CustomAllocator::allocator
-
-#undef EASTLAllocatorDefault
-#define EASTLAllocatorDefault CustomAllocator::GetDefaultAllocator
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <malloc.h>
@@ -19,9 +7,12 @@
 #ifdef _WIN32
 // corecrt_malloc.h contains _aligned_malloc
 #define posix_memalign(p, a, s) (((*(p)) = _aligned_malloc((s), (a))), *(p) ?0 :errno)
-
+#define posix_free _aligned_free
+#else
+#define posix_free free
 #endif // _WIN32
 
+#ifdef TEST_MALLOC_ALIGNED
 
 inline int test_malloc_aligned()
 {
@@ -36,10 +27,30 @@ inline int test_malloc_aligned()
     printf("\nis %3d byte aligned = %s\n", 32, (((size_t)mem) % 32) ? "no" : "yes");
     printf("\nis %3d byte aligned = %s\n", alignment, (((size_t)mem) % alignment ) ? "no" : "yes");
 
-    _aligned_free(mem);
+    posix_free(mem);
 
     return EXIT_SUCCESS ;
 }
+
+#endif // TEST_MALLOC_ALIGNED
+
+/*
+here we start definining our own allocator
+*/
+
+#define _XOPEN_SOURCE 600
+// Must declare this to avoid new[]/delete[] prototypes in allocator.h
+#define EASTL_USER_DEFINED_ALLOCATOR 
+#define EASTL_ALLOCATOR_DEFAULT_NAME "dbj_alligned_allocator"
+
+// these macros are important
+// we use them before we include eabase/eabase.h
+
+#undef EASTLAllocatorType
+#define EASTLAllocatorType CustomAllocator::allocator
+
+#undef EASTLAllocatorDefault
+#define EASTLAllocatorDefault CustomAllocator::GetDefaultAllocator
 
 #include <EABase/eabase.h>
 #include <EASTL/internal/config.h>
@@ -107,7 +118,7 @@ namespace CustomAllocator {
 #if defined(EA_DEBUG)
       printf("Freeing %lu bytes\n",n);
 #endif
-      _aligned_free(p);
+      posix_free(p);
     }
     
     // Name info
@@ -145,6 +156,8 @@ namespace CustomAllocator {
   }
   
   // Defines the EASTL API glue, so we can set our allocator as the global default allocator
+  // WARNING: in the presence of MT this will not work well. these are process wide globals
+  // this here is just a sampling code ... please use your own form of locking in real life.
   inline  allocator  gDefaultAllocator;
   inline  allocator* gpDefaultAllocator = &gDefaultAllocator;
   
