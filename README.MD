@@ -12,31 +12,31 @@ All such things are infinitely simpler to change vs MS STL. We will update this 
 
 ## How to use
 
-We include the [headers](./include/) and we add the cpp files in the [src folder](./src/) . We do not build a library or a DLL to use this. Anyway you know the DLL written in C++ is very elusive prey to catch. And we have no time for that hunt. 
+We include the [headers](./include/) and we add the cpp files in the [src folder](./src/) . We do not build a library or a DLL to use this. You know the DLL written in C++ is very elusive prey to catch. And we have no time for that hunt. 
 
-Windows service or a driver is kind-of-a DLL. Which is fine since we use this code only internaly.
+But, our main kind of a project is WIN32 service? Windows service or a driver is kind-of-a DLL. Which is fine since we use this code only internally.
 
 ## Built with Visual Studio 2019 
 
-Standard C++17 
+C++ : Standard C++17. Remember: this is already not tne official latest standard.
 
 Compiled with Visual Studio 2019 and
 
 1. Visual C++ 2019   00435-60000-00000-AA768
 2. CLANG 10.0.1 (packaged with VS)
 
-No other changed to any project properties have been done. In any case please look into the [VS project provided](./dbj_test/) for an standard build sample, with few tests.
+No other changes to any project properties have been done. In any case please look into the [VS project provided](./dbj_test/) for an standard build sample, with few tests.
 
 ### Noexcept Allocators
 
-This is *very* important. Inability to do this in the std lib [breaks the whole C++ community](https://thephd.github.io/freestanding-noexcept-allocators-vector-memory-hole) into two pro and ante, std lib fractions. The rift which probably will not heal. EASTL 2020 is one known example. In EASTL 2010 that was still not understood :)
+This is *very* important. During last few years, inability to do this in the std lib [breaks the whole C++ community](https://thephd.github.io/freestanding-noexcept-allocators-vector-memory-hole) into two fractions. The ones anti std lib and the ones pro std lib. The rift which probably will not heal. EASTL 2020 is one known example from the half which is not using std lib. When EASTL 2010 was conceived, that was still already understood.
 
-But we do not care since we do not have to include from some base allocator neither. Thus please think of your custom allocator to be used in this lib as this synopsis shows:
+We simply do not care. Please think of your custom allocator to be used with this lib. Synopsis:
 
 ```cpp
-namespace my
+namespace dbj
 {
-    // yours is all noexcept allocator "interface"
+    // all noexcept allocator "interface"
     // the std lib dream ...
 class allocator
     {
@@ -58,7 +58,7 @@ Look into `./custom/custom_allocator.h` for an example. Note: default allocator 
 
 ### EASTL_ALLOCATOR_EXPLICIT
 
-File config.h , line # 1118
+Minor change. File config.h , line # 1118
 
 ```cpp
 #ifndef EASTL_ALLOCATOR_EXPLICIT_ENABLED
