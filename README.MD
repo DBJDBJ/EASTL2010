@@ -29,7 +29,7 @@ No other changes to any project properties have been done. In any case please lo
 
 ### Noexcept Allocators
 
-This is *very* important. During last few years, inability to do this in the std lib [breaks the whole C++ community](https://thephd.github.io/freestanding-noexcept-allocators-vector-memory-hole) into two fractions. The ones anti std lib and the ones pro std lib. The rift which probably will not heal. EASTL 2020 is one known example from the half which is not using std lib. When EASTL 2010 was conceived, that was still already understood.
+This is *very* important. During last few years, inability to do this in the std lib [breaks the whole C++ community](https://thephd.github.io/freestanding-noexcept-allocators-vector-memory-hole) into two fractions. The ones anti std lib and the ones pro std lib. The rift which probably will not heal. EASTL 2020 is one known example from the half which is not using std lib. When EASTL 2010 was conceived, that was already understood.
 
 We simply do not care. Please think of your custom allocator to be used with this lib. Synopsis:
 
