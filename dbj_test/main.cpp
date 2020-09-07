@@ -70,16 +70,29 @@ int test_custom_allocator();
 int eastl_test_vector();
 int eastl_test_vector_map();
 int test_hash_map_string();
+
+#ifdef TEST_MALLOC_ALIGNED
 int test_malloc_aligned();
+#endif
 
 #endif // OTHER_TESTS
 
+// EA_COMPILER_NO_EXCEPTIONS
 
 int main(const int argc, char ** argv)
 {
     constexpr auto dbj_test_loop_size_ = 1000000 / 10;
 
-// making this laqrger than small size optimization (SSO) value 
+#ifdef _WIN32
+    win_enable_vt_100_and_unicode();
+
+    // warning: will exit(-1) on mistakes made
+    // font name is case sensitive
+    // if your font name is not found default is used
+    win_set_console_font(L"Consolas", 36);
+#endif
+
+// making this larger than small size optimization (SSO) value 
 // makes very large difference in comparisons with EASTL
 #ifdef SHORT_SPECIMEN
 #define DBJ_STRING_SPECIMEN "Hello"
@@ -88,8 +101,12 @@ int main(const int argc, char ** argv)
 #endif
 
 #ifdef _KERNEL_MODE
-    printf("\n\n******************* KERNEL MODE ****************************\n\n");
+    printf(VT100_LIGHT_RED "\n\n******************* KERNEL MODE ****************************\n\n" VT100_RESET);
 #endif // _KERNEL_MODE
+
+#ifdef EA_COMPILER_NO_EXCEPTIONS
+    SX(EA_COMPILER_NO_EXCEPTIONS);
+#endif
 
 
 #ifdef __clang__
@@ -109,8 +126,8 @@ int main(const int argc, char ** argv)
 #endif
 
 
-    printf("\n\nSpecimen: \"%s\" (length: %zd)\n", DBJ_STRING_SPECIMEN, strlen(DBJ_STRING_SPECIMEN));
-    printf("\n\nTest Loop length: %03.1f milions\n\n", double(dbj_test_loop_size_) / 1000000 );
+    printf(VT100_LIGHT_GREEN "\n\nSpecimen: \"%s\" (length: %zd)\n", DBJ_STRING_SPECIMEN, strlen(DBJ_STRING_SPECIMEN));
+    printf("\n\nTest Loop length: %03.1f milions\n\n" VT100_RESET, double(dbj_test_loop_size_) / 1000000 );
 
 #ifndef _KERNEL_MODE
     try {
@@ -138,7 +155,7 @@ int main(const int argc, char ** argv)
 
 #endif // OTHER_TESTS
 
-    printf("\n\nDone ...\n\n");
+    printf(VT100_LIGHT_GREEN "\n\nDone ...\n\n" VT100_RESET);
 
 
 }

@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\custom\custom_allocator.h" />
     <ClCompile Include="..\src\allocator.cpp" />
     <ClCompile Include="..\src\assert.cpp" />
     <ClCompile Include="..\src\fixed_pool.cpp" />
@@ -32,7 +31,9 @@
     <ClCompile Include="test\test_vector_map.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="custom_allocator.h" />
     <ClInclude Include="dbj_common.h" />
+    <ClInclude Include="dbj_nano_synchro.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

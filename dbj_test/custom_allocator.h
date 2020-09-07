@@ -1,16 +1,53 @@
 #pragma once
 
+/*
+(c) 2019-2020 by dbj.org   -- LICENSE DBJ -- https://dbj.org/license_dbj/
+*/
+#ifdef __STDC_ALLOC_LIB__
+#define __STDC_WANT_LIB_EXT2__ 1
+#else
+#define _POSIX_C_SOURCE 200809L
+#endif
+
+#include "dbj_nano_synchro.h" //  dbj::lock_unlock autolock_ ;
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <malloc.h>
 
-#ifdef _WIN32
+//  int posix_memalign(void **memptr, size_t alignment, size_t size);
+
+typedef struct Alignment { size_t val; } Alignment;
+typedef struct Size      { size_t val; } Size ;
 // corecrt_malloc.h contains _aligned_malloc
-#define posix_memalign(p, a, s) (((*(p)) = _aligned_malloc((s), (a))), *(p) ?0 :errno)
-#define posix_free _aligned_free
-#else
-#define posix_free free
-#endif // _WIN32
+inline int dbj_memalign(void** p, Alignment alignment_, Size size_ ) 
+{
+    int erc = 0;
+    _set_errno(0); 
+
+#ifdef _WIN32
+    *p = _aligned_malloc(size_.val, alignment_.val);
+    erc = errno;
+#else  // ! _WIN32
+    erc = posix_memalign(p, size_.val, alignment_.val);
+#endif // ! _WIN32
+    return erc ;
+}
+
+inline int dbj_free( void * p ) 
+{
+    int erc = 0;
+    _set_errno(0);
+#ifdef _WIN32
+    _aligned_free(p);
+    erc = errno;
+#else  // ! _WIN32
+    free(p);
+    erc = errno;
+#endif // ! _WIN32
+    p = NULL;
+    return erc;
+}
 
 #ifdef TEST_MALLOC_ALIGNED
 
@@ -19,22 +56,29 @@ inline int test_malloc_aligned()
     printf("\n"  __FUNCSIG__ "\n" );
 
     char* mem = NULL;
-    int alignment = 64;
-    int n = 100;
+    // CL does not do "compund literals"
+    // so we do string types in a pedestrian way
+    // that is we can not do
+    // int erc = dbj_memalign((void**)&mem, (Alignment) { alignment }, (Size) { n });
 
-    int erc = posix_memalign((void**)&mem, alignment, n);
+    Alignment alignment = { 64 };
+    Size n = { 100 } ;
 
-    printf("\nis %3d byte aligned = %s\n", 32, (((size_t)mem) % 32) ? "no" : "yes");
-    printf("\nis %3d byte aligned = %s\n", alignment, (((size_t)mem) % alignment ) ? "no" : "yes");
+    int erc = dbj_memalign((void**)&mem, alignment , n );
 
-    posix_free(mem);
+    size_t wrong_alignment = 13;
+
+    printf("\nis %3zd byte aligned = %s\n", wrong_alignment, (((size_t)mem) % wrong_alignment) ? "no" : "yes");
+    printf("\nis %3zd byte aligned = %s\n", alignment.val, (((size_t)mem) % alignment.val ) ? "no" : "yes");
+
+    dbj_free(mem);
 
     return EXIT_SUCCESS ;
 }
 
 #endif // TEST_MALLOC_ALIGNED
 
-/*
+/*******************************************************************************************
 here we start definining our own allocator
 */
 
@@ -47,15 +91,36 @@ here we start definining our own allocator
 // we use them before we include eabase/eabase.h
 
 #undef EASTLAllocatorType
-#define EASTLAllocatorType CustomAllocator::allocator
+#define EASTLAllocatorType dbj::allocator
 
 #undef EASTLAllocatorDefault
-#define EASTLAllocatorDefault CustomAllocator::GetDefaultAllocator
+#define EASTLAllocatorDefault dbj::GetDefaultAllocator
 
 #include <EABase/eabase.h>
 #include <EASTL/internal/config.h>
 
-namespace CustomAllocator {
+namespace dbj {
+
+/**
+* Machine word size. Depending on the architecture,
+* can be 4 or 8 bytes.
+*/
+    using word_t = intptr_t;
+    /// ----------------------------------------------------------------------
+    /**
+     * Aligns the size by the machine word.
+     http://dmitrysoshnikov.com/compilers/writing-a-memory-allocator/#memory-alignment
+     */
+    constexpr inline size_t align(size_t n) {
+        return (n + sizeof(word_t) - 1) & ~(sizeof(word_t) - 1);
+    }
+
+    /// ----------------------------------------------------------------------
+    inline bool is_aligned(void* ptr, size_t alignment) {
+        if (((unsigned long long)ptr % alignment) == 0)
+            return true;
+        return false;
+    }
 
   // Define our allocator class and implement it
   class allocator
@@ -101,7 +166,7 @@ namespace CustomAllocator {
     }
 
     // obviously aligned allocation is required here
-     void* allocate(size_t n, size_t alignment, size_t offset, int flags = 0) noexcept
+     void* allocate(size_t n_, size_t alignment_, size_t offset, int flags = 0) noexcept
     {
       char* mem = NULL;
       
@@ -109,7 +174,9 @@ namespace CustomAllocator {
       printf("Align Malloc'ing %lu bytes\n",n);
 #endif
       
-      posix_memalign((void**)&mem, alignment, n);
+      Alignment alignment = { alignment_ };
+      Size      n = {n_};
+      dbj_memalign((void**)&mem, alignment, n ) ;
       return mem;
     }
     
@@ -118,7 +185,7 @@ namespace CustomAllocator {
 #if defined(EA_DEBUG)
       printf("Freeing %lu bytes\n",n);
 #endif
-      posix_free(p);
+      dbj_free(p);
     }
     
     // Name info
@@ -156,24 +223,30 @@ namespace CustomAllocator {
   }
   
   // Defines the EASTL API glue, so we can set our allocator as the global default allocator
-  // WARNING: in the presence of MT this will not work well. these are process wide globals
-  // this here is just a sampling code ... please use your own form of locking in real life.
-  inline  allocator  gDefaultAllocator;
-  inline  allocator* gpDefaultAllocator = &gDefaultAllocator;
-  
+
+  namespace detail {
+      inline  allocator  default_allocator_global_instance_;
+      inline  allocator* ptr_to_default_allocator_global_ = &default_allocator_global_instance_;
+  } // detail
+
   inline  allocator* GetDefaultAllocator()
   { 
-      return gpDefaultAllocator; 
+      // this here is just a sampling code ... please use your own form of locking in real life.
+      dbj::lock_unlock autolock_;
+
+      return detail::ptr_to_default_allocator_global_;
   }
   
   inline allocator* SetDefaultAllocator(allocator* pNewAlloc)
   {
-    allocator* pOldAlloc = gpDefaultAllocator;
-    gpDefaultAllocator = pNewAlloc;
+      dbj::lock_unlock autolock_;
+
+    allocator* pOldAlloc = detail::ptr_to_default_allocator_global_;
+    detail::ptr_to_default_allocator_global_ = pNewAlloc;
     return pOldAlloc;
   }
 
-} // namespace CustomAllocator
+} // namespace dbj
 
 
 #if 0
