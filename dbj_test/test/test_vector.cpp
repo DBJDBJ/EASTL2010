@@ -36,6 +36,7 @@ void move_constructor() {
 #endif
 
 int eastl_test_vector () {
+	printf("\n" VT100_LIGHT_BLUE __FUNCSIG__  VT100_RESET);
 #ifdef EA_COMPILER_HAS_MOVE_SEMANTICS
   move_push_back();
   move_constructor();

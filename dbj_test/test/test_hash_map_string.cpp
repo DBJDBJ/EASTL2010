@@ -6,21 +6,6 @@
 #include <EASTL/hash_map.h>
 #include <EASTL/string.h>
 
-#if 0
-
-// for some reason this is required here ... but not elsewhere?
-// EASTL also wants us to define this (see string.h line 197)
-extern "C" static int Vsnprintf8(char8_t* pDestination, size_t n, const char8_t* pFormat, va_list arguments)
-{
-#ifdef _MSC_VER
-	return _vsnprintf(pDestination, n, pFormat, arguments);
-#else
-	return vsnprintf(pDestination, n, pFormat, arguments);
-#endif
-}
-
-#endif // 0
-
 static void test_hash_map()
 {
   eastl::hash_map<eastl::string, eastl::string> map;
@@ -44,6 +29,7 @@ static void test_string()
 
 int test_hash_map_string( )
 {
+	printf("\n" VT100_LIGHT_BLUE __FUNCSIG__  VT100_RESET);
   test_hash_map();
   test_string();
   return EXIT_SUCCESS;

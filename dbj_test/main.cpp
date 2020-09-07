@@ -42,6 +42,7 @@ static void performance_test(size_t loop_length, const char * str_specimen_ )
     printf("%f sec\n", diff_per_second(end,start) );
 
 
+    // no std lib in kernel mode 
 #ifndef _KERNEL_MODE
     // Standard
     printf("\nStandard STL     ");
@@ -57,22 +58,32 @@ static void performance_test(size_t loop_length, const char * str_specimen_ )
 
     end = clock();
     printf("%f sec\n", diff_per_second(end, start) );
-#endif // _KERNEL_MODE
+#endif //!  _KERNEL_MODE
 }
 
-
 #define SHORT_SPECIMEN
+
+// making this larger than small size optimization (SSO) value 
+// makes very large difference in comparisons with EASTL
+#ifdef SHORT_SPECIMEN
+#define DBJ_STRING_SPECIMEN "Hello"
+#else
+#define DBJ_STRING_SPECIMEN "Hello young fellow from the shallow, why are you so mellow? Perhaps thy friend is the badfellow? "
+#endif
 
 #define OTHER_TESTS
 #ifdef OTHER_TESTS
 
+#ifdef TEST_CUSTOM_ALLOCATOR
 int test_custom_allocator();
+#endif
+
 int eastl_test_vector();
 int eastl_test_vector_map();
 int test_hash_map_string();
 
 #ifdef TEST_MALLOC_ALIGNED
-int test_malloc_aligned();
+int test_malloc_aligned() noexcept ;
 #endif
 
 #endif // OTHER_TESTS
@@ -89,15 +100,7 @@ int main(const int argc, char ** argv)
     // warning: will exit(-1) on mistakes made
     // font name is case sensitive
     // if your font name is not found default is used
-    win_set_console_font(L"Consolas", 36);
-#endif
-
-// making this larger than small size optimization (SSO) value 
-// makes very large difference in comparisons with EASTL
-#ifdef SHORT_SPECIMEN
-#define DBJ_STRING_SPECIMEN "Hello"
-#else
-#define DBJ_STRING_SPECIMEN "Hello young fellow from the shallow, why are you so mellow? Perhaps thy friend is the badfellow? "
+    win_set_console_font(L"Consolas", 24);
 #endif
 
 #ifdef _KERNEL_MODE
@@ -108,26 +111,27 @@ int main(const int argc, char ** argv)
     SX(EA_COMPILER_NO_EXCEPTIONS);
 #endif
 
-
+    printf(VT100_LIGHT_GREEN);
 #ifdef __clang__
-    printf("\n\nCLANG ");
-    printf("\n\n __VERSION__ : %d\n", __VERSION__);
+    printf("\nCLANG ");
+    printf("\n __VERSION__ : %d", __VERSION__);
 #else
-    printf("\n\nCL    ");
-    printf("\n\n _MSC_FULL_VER : %d\n", _MSC_FULL_VER);
+    printf("\nCL    ");
+    printf("\n_MSC_FULL_VER : %d", _MSC_FULL_VER);
 #endif
 
-    printf("\n% s[version % s]  \n\n__cplusplus: %lu ", argv[0], __TIMESTAMP__, __cplusplus);
+    printf("\n% s[version % s]  \n__cplusplus: %lu ", argv[0], __TIMESTAMP__, __cplusplus);
 
 #ifdef _DEBUG
     printf("\tDEBUG build");
 #else
     printf("\tRELEASE build");
 #endif
+    printf(VT100_RESET);
 
 
-    printf(VT100_LIGHT_GREEN "\n\nSpecimen: \"%s\" (length: %zd)\n", DBJ_STRING_SPECIMEN, strlen(DBJ_STRING_SPECIMEN));
-    printf("\n\nTest Loop length: %03.1f milions\n\n" VT100_RESET, double(dbj_test_loop_size_) / 1000000 );
+    printf(VT100_LIGHT_GREEN "\nSpecimen: \"%s\" (length: %zd)", DBJ_STRING_SPECIMEN, strlen(DBJ_STRING_SPECIMEN));
+    printf("\nTest Loop length: %03.1f milions" VT100_RESET, double(dbj_test_loop_size_) / 1000000 );
 
 #ifndef _KERNEL_MODE
     try {
@@ -146,9 +150,12 @@ int main(const int argc, char ** argv)
 #endif // _KERNEL_MODE
 
 #ifdef OTHER_TESTS
-
+#ifdef TEST_MALLOC_ALIGNED
     test_malloc_aligned();
+#endif
+#ifdef TEST_CUSTOM_ALLOCATOR
     test_custom_allocator();
+#endif
     eastl_test_vector();
     eastl_test_vector_map();
     test_hash_map_string();

@@ -16,12 +16,15 @@
 #include <malloc.h>
 
 //  int posix_memalign(void **memptr, size_t alignment, size_t size);
-
+// we use Strong types concept
 typedef struct Alignment { size_t val; } Alignment;
 typedef struct Size      { size_t val; } Size ;
+
 // corecrt_malloc.h contains _aligned_malloc
-inline int dbj_memalign(void** p, Alignment alignment_, Size size_ ) 
+inline int dbj_memalign(void** p, Alignment alignment_, Size size_ ) noexcept
 {
+    DBJ_LOCAL_LOCK;
+
     int erc = 0;
     _set_errno(0); 
 
@@ -34,8 +37,10 @@ inline int dbj_memalign(void** p, Alignment alignment_, Size size_ )
     return erc ;
 }
 
-inline int dbj_free( void * p ) 
+inline int dbj_free( void * p ) noexcept
 {
+    dbj::local_lock_unlock autolock_;
+
     int erc = 0;
     _set_errno(0);
 #ifdef _WIN32
@@ -51,9 +56,11 @@ inline int dbj_free( void * p )
 
 #ifdef TEST_MALLOC_ALIGNED
 
-inline int test_malloc_aligned()
+inline int test_malloc_aligned() noexcept
 {
-    printf("\n"  __FUNCSIG__ "\n" );
+    dbj::local_lock_unlock autolock_;
+
+    printf("\n" VT100_LIGHT_BLUE __FUNCSIG__  VT100_RESET );
 
     char* mem = NULL;
     // CL does not do "compund literals"
@@ -68,8 +75,8 @@ inline int test_malloc_aligned()
 
     size_t wrong_alignment = 13;
 
-    printf("\nis %3zd byte aligned = %s\n", wrong_alignment, (((size_t)mem) % wrong_alignment) ? "no" : "yes");
-    printf("\nis %3zd byte aligned = %s\n", alignment.val, (((size_t)mem) % alignment.val ) ? "no" : "yes");
+    printf("\nis %3zd byte aligned = %s", wrong_alignment, (((size_t)mem) % wrong_alignment) ? "no" : "yes");
+    printf("\nis %3zd byte aligned = %s", alignment.val, (((size_t)mem) % alignment.val ) ? "no" : "yes");
 
     dbj_free(mem);
 
@@ -231,15 +238,14 @@ namespace dbj {
 
   inline  allocator* GetDefaultAllocator()
   { 
-      // this here is just a sampling code ... please use your own form of locking in real life.
-      dbj::lock_unlock autolock_;
+      DBJ_LOCAL_LOCK;
 
       return detail::ptr_to_default_allocator_global_;
   }
   
   inline allocator* SetDefaultAllocator(allocator* pNewAlloc)
   {
-      dbj::lock_unlock autolock_;
+      DBJ_LOCAL_LOCK;
 
     allocator* pOldAlloc = detail::ptr_to_default_allocator_global_;
     detail::ptr_to_default_allocator_global_ = pNewAlloc;
@@ -249,22 +255,12 @@ namespace dbj {
 } // namespace dbj
 
 
-#if 0
-// EASTL also wants us to define this (see string.h line 197)
-int Vsnprintf8(char8_t* pDestination, size_t n, const char8_t* pFormat, va_list arguments)
-{
-#ifdef _MSC_VER
-  return _vsnprintf(pDestination, n, pFormat, arguments);
-#else
-  return vsnprintf(pDestination, n, pFormat, arguments);
-#endif
-}
-#endif // 0
-
+#ifdef TEST_CUSTOM_ALLOCATOR
 #include <EASTL/string.h>
 
 inline int test_custom_allocator()
 {
+    printf("\n" VT100_LIGHT_BLUE __FUNCSIG__  VT100_RESET);
   eastl::string str;
 
   str += "o";
@@ -295,3 +291,6 @@ inline int test_custom_allocator()
 
   return EXIT_SUCCESS;
 }
+
+#endif // TEST_CUSTOM_ALLOCATOR
+

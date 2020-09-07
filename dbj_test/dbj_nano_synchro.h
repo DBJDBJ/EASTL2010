@@ -131,18 +131,52 @@ namespace dbj {
 
     }
     */
-    struct lock_unlock final
+    struct no_copy_no_move
     {
-        lock_unlock() noexcept {
+        no_copy_no_move() = default;
+
+        no_copy_no_move(no_copy_no_move const&) = delete;
+        no_copy_no_move& operator = (no_copy_no_move const&) = delete;
+
+        no_copy_no_move(no_copy_no_move&&) = delete;
+        no_copy_no_move& operator = (no_copy_no_move&&) = delete;
+    };
+
+    struct global_lock_unlock final : private no_copy_no_move
+    {
+        explicit global_lock_unlock() noexcept {
             dbj_synchro_enter();
         }
-        ~lock_unlock() {
+        ~global_lock_unlock() noexcept {
             dbj_synchro_leave();
         }
+    };
+
+
+    struct local_lock_unlock final : private no_copy_no_move
+    {
+        explicit local_lock_unlock() noexcept {
+            InitializeCriticalSection(&crit_sect_);
+            EnterCriticalSection(&crit_sect_);
+        }
+        ~local_lock_unlock() noexcept {
+            DeleteCriticalSection(&crit_sect_);
+            LeaveCriticalSection(&crit_sect_);
+        }
+    private:
+        CRITICAL_SECTION crit_sect_{};
     };
 
 } // dbj ns
 #pragma endregion
 #endif // __cplusplus
+
+#ifdef DBJ_NANO_LIB_MT
+#define DBJ_GLOBAL_LOCK dbj::global_lock_unlock padlock_
+#define DBJ_LOCAL_LOCK  dbj::local_lock_unlock  padlock_
+#else
+#define DBJ_GLOBAL_LOCK 
+#define DBJ_LOCAL_LOCK  
+#endif 
 
 #endif // !_DBJ_NANO_CYNCHRO_INC_
