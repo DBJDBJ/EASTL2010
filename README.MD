@@ -94,6 +94,22 @@ Line 333
 
 That makes build possible with CLANG 10.x, as packaged under Visual Studio 2019. Problem was in `fixedpool.h` lines 109 to 145.
 
+## What is missing and what to do about it
+
+### Array
+
+There is `eastl::fixed_vector`. But that is not std::array. Not even close. We do use c++ array version of our own. A lot.
+
+There are quite a few std array implementations on the github. We use our own. Ask and we will send it to you.
+
+### iostreams
+
+iostreams are the epitome of C++ gone the wrong way. Or they are a god send. It depends on your point of view. What do I think? I think implementation is the problem. Too much inheritance and virtual tables. Exceptions and (even) std::string are in use. I would rather avoid iostreams.
+
+In embedded and all the other mission critical code there is no console whatsoever. Neither there is heap very often. And local filesystem is almost always out of reach.
+
+We use very light and small `printf` version, that uses no heap at all. Again, ask and we will send it to you.
+
 ---
 
 (rare) changes in this repo are &copy; 2020 by dbj.systems
@@ -131,3 +147,5 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 </font>
+
+

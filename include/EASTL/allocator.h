@@ -6,13 +6,13 @@ modification, are permitted provided that the following conditions
 are met:
 
 1.  Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
+	notice, this list of conditions and the following disclaimer.
 2.  Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in the
-    documentation and/or other materials provided with the distribution.
+	notice, this list of conditions and the following disclaimer in the
+	documentation and/or other materials provided with the distribution.
 3.  Neither the name of Electronic Arts, Inc. ("EA") nor the names of
-    its contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
+	its contributors may be used to endorse or promote products derived
+	from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY ELECTRONIC ARTS AND ITS CONTRIBUTORS "AS IS" AND ANY
 EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -51,136 +51,135 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace eastl
 {
 
-    /// EASTL_ALLOCATOR_DEFAULT_NAME
-    ///
-    /// Defines a default allocator name in the absence of a user-provided name.
-    ///
+	/// EASTL_ALLOCATOR_DEFAULT_NAME
+	///
+	/// Defines a default allocator name in the absence of a user-provided name.
+	///
 #ifndef EASTL_ALLOCATOR_DEFAULT_NAME
 #  define EASTL_ALLOCATOR_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX // Unless the user overrides something, this is "EASTL".
 #endif
 
 
-    /// alloc_flags
-    ///
-    /// Defines allocation flags.
-    ///
-    enum alloc_flags 
-    {
-        MEM_TEMP = 0, // Low memory, not necessarily actually temporary.
-        MEM_PERM = 1  // High memory, for things that won't be unloaded.
-    };
+	/// alloc_flags
+	///
+	/// Defines allocation flags.
+	///
+	enum alloc_flags
+	{
+		MEM_TEMP = 0, // Low memory, not necessarily actually temporary.
+		MEM_PERM = 1  // High memory, for things that won't be unloaded.
+	};
 
 
-    /// allocator
-    ///
-    /// In this allocator class, note that it is not templated on any type and
-    /// instead it simply allocates blocks of memory much like the C malloc and
-    /// free functions. It can be thought of as similar to C++ std::allocator<char>.
-    /// The flags parameter has meaning that is specific to the allocation 
-    ///
-    class EASTL_API allocator
-    {
-    public:
-        typedef eastl_size_t size_type;
+	/// allocator
+	///
+	/// In this allocator class, note that it is not templated on any type and
+	/// instead it simply allocates blocks of memory much like the C malloc and
+	/// free functions. It can be thought of as similar to C++ std::allocator<char>.
+	/// The flags parameter has meaning that is specific to the allocation 
+	///
+	class EASTL_API allocator
+	{
+	public:
+		typedef eastl_size_t size_type;
 
-        EASTL_ALLOCATOR_EXPLICIT allocator(const char* pName = EASTL_NAME_VAL(EASTL_ALLOCATOR_DEFAULT_NAME));
-        allocator(const allocator& x);
-        allocator(const allocator& x, const char* pName);
+		EASTL_ALLOCATOR_EXPLICIT allocator(const char* pName = EASTL_NAME_VAL(EASTL_ALLOCATOR_DEFAULT_NAME));
+		allocator(const allocator& x);
+		allocator(const allocator& x, const char* pName);
 
-        allocator& operator=(const allocator& x);
+		allocator& operator=(const allocator& x);
 
-        void* allocate(size_t n, int flags = 0);
-        void* allocate(size_t n, size_t alignment, size_t offset, int flags = 0);
-        void  deallocate(void* p, size_t n);
+		void* allocate(size_t n, int flags = 0);
+		void* allocate(size_t n, size_t alignment, size_t offset, int flags = 0);
+		void  deallocate(void* p, size_t n);
 
-        const char* get_name() const;
-        void        set_name(const char* pName);
+		const char* get_name() const;
+		void        set_name(const char* pName);
 
-    protected:
+	protected:
 #if EASTL_NAME_ENABLED
-            const char* mpName; // Debug name, used to track memory.
+		const char* mpName; // Debug name, used to track memory.
 #endif
-    };
+	};
 
-    bool operator==(const allocator& a, const allocator& b);
-    bool operator!=(const allocator& a, const allocator& b);
+	bool operator==(const allocator& a, const allocator& b);
+	bool operator!=(const allocator& a, const allocator& b);
 
-    EASTL_API allocator* GetDefaultAllocator();
-    EASTL_API allocator* SetDefaultAllocator(allocator* pAllocator);
-
-
-
-    /// get_default_allocator
-    ///
-    /// This templated function allows the user to implement a default allocator
-    /// retrieval function that any part of EASTL can use. EASTL containers take
-    /// an Allocator parameter which identifies an Allocator class to use. But 
-    /// different kinds of allocators have different mechanisms for retrieving 
-    /// a default allocator instance, and some don't even intrinsically support
-    /// such functionality. The user can override this get_default_allocator 
-    /// function in order to provide the glue between EASTL and whatever their
-    /// system's default allocator happens to be.
-    ///
-    /// Example usage:
-    ///     MyAllocatorType* gpSystemAllocator;
-    ///     
-    ///     MyAllocatorType* get_default_allocator(const MyAllocatorType*)
-    ///         { return gpSystemAllocator; }
-    ///
-    template <typename Allocator>
-    inline Allocator* get_default_allocator(const Allocator*)
-    {
-        return NULL; // By default we return NULL; the user must make specialization of this function in order to provide their own implementation.
-    }
-
-    inline EASTLAllocatorType* get_default_allocator(const EASTLAllocatorType*)
-    {
-        return EASTLAllocatorDefault(); // For the built-in allocator EASTLAllocatorType, we happen to already have a function for returning the default allocator instance, so we provide it.
-    }
+	EASTL_API allocator* GetDefaultAllocator();
+	EASTL_API allocator* SetDefaultAllocator(allocator* pAllocator);
 
 
-    /// default_allocfreemethod
-    ///
-    /// Implements a default allocfreemethod which uses the default global allocator.
-    /// This version supports only default alignment.
-    ///
-    inline void* default_allocfreemethod(size_t n, void* pBuffer, void* /*pContext*/)
-    {
-        EASTLAllocatorType* const pAllocator = EASTLAllocatorDefault();
 
-        if(pBuffer) // If freeing...
-        {
-            EASTLFree(*pAllocator, pBuffer, n);
-            return NULL;  // The return value is meaningless for the free.
-        }
-        else // allocating
-            return EASTLAlloc(*pAllocator, n);
-    }
+	/// get_default_allocator
+	///
+	/// This templated function allows the user to implement a default allocator
+	/// retrieval function that any part of EASTL can use. EASTL containers take
+	/// an Allocator parameter which identifies an Allocator class to use. But 
+	/// different kinds of allocators have different mechanisms for retrieving 
+	/// a default allocator instance, and some don't even intrinsically support
+	/// such functionality. The user can override this get_default_allocator 
+	/// function in order to provide the glue between EASTL and whatever their
+	/// system's default allocator happens to be.
+	///
+	/// Example usage:
+	///     MyAllocatorType* gpSystemAllocator;
+	///     
+	///     MyAllocatorType* get_default_allocator(const MyAllocatorType*)
+	///         { return gpSystemAllocator; }
+	///
+	template <typename Allocator>
+	inline Allocator* get_default_allocator(const Allocator*)
+	{
+		return NULL; // By default we return NULL; the user must make specialization of this function in order to provide their own implementation.
+	}
+
+	inline EASTLAllocatorType* get_default_allocator(const EASTLAllocatorType*)
+	{
+		return EASTLAllocatorDefault(); // For the built-in allocator EASTLAllocatorType, we happen to already have a function for returning the default allocator instance, so we provide it.
+	}
 
 
-    /// allocate_memory
-    ///
-    /// This is a memory allocation dispatching function.
-    /// To do: Make aligned and unaligned specializations.
-    ///        Note that to do this we will need to use a class with a static
-    ///        function instead of a standalone function like below.
-    ///
-    template <typename Allocator>
-    void* allocate_memory(Allocator& a, size_t n, size_t alignment, size_t alignmentOffset)
-    {
-        if(alignment <= 8)
-            return EASTLAlloc(a, n);
-        return EASTLAllocAligned(a, n, alignment, alignmentOffset);
-    }
+	/// default_allocfreemethod
+	///
+	/// Implements a default allocfreemethod which uses the default global allocator.
+	/// This version supports only default alignment.
+	///
+	inline void* default_allocfreemethod(size_t n, void* pBuffer, void* /*pContext*/)
+	{
+		EASTLAllocatorType* const pAllocator = EASTLAllocatorDefault();
+
+		if (pBuffer) // If freeing...
+		{
+			EASTLFree(*pAllocator, pBuffer, n);
+			return NULL;  // The return value is meaningless for the free.
+		}
+		else // allocating
+			return EASTLAlloc(*pAllocator, n);
+	}
+
+
+	/// allocate_memory
+	///
+	/// This is a memory allocation dispatching function.
+	/// To do: Make aligned and unaligned specializations.
+	///        Note that to do this we will need to use a class with a static
+	///        function instead of a standalone function like below.
+	///
+	template <typename Allocator>
+	void* allocate_memory(Allocator& a, size_t n, size_t alignment, size_t alignmentOffset)
+	{
+		if (alignment <= 8)
+			return EASTLAlloc(a, n);
+		return EASTLAllocAligned(a, n, alignment, alignmentOffset);
+	}
 
 } // namespace eastl
 
 
-
-
-
 #ifndef EASTL_USER_DEFINED_ALLOCATOR // If the user hasn't declared that he has defined a different allocator implementation elsewhere...
 
+// removed by DBJ
+#if 0
 #  ifdef _MSC_VER
 #    pragma warning(push, 0)
 #    include <new>
@@ -188,141 +187,204 @@ namespace eastl
 #  else
 #    include <new>
 #  endif
+#endif // 0
 
-#  if !EASTL_DLL // If building a regular library and not building EASTL as a DLL...
-        // It is expected that the application define the following
-        // versions of operator new for the application. Either that or the
-        // user needs to override the implementation of the allocator class.
-        void* operator new[](size_t size, const char* pName, int flags, unsigned debugFlags, const char* file, int line);
-        void* operator new[](size_t size, size_t alignment, size_t alignmentOffset, const char* pName, int flags, unsigned debugFlags, const char* file, int line);
-#  endif
+// DBJ: no more EASTL_DLL -- #  if !EASTL_DLL 
 
-    namespace eastl
-    {
-        inline allocator::allocator(const char* EASTL_NAME(pName))
-        {
+// original comment:
+// If building a regular library and not building EASTL as a DLL...
+// It is expected that the application define the following
+// versions of operator new for the application. Either that or the
+// user needs to override the implementation of the allocator class.
+// void* operator new[](size_t size, const char* pName, int flags, unsigned debugFlags, const char* file, int line);
+// void* operator new[](size_t size, size_t alignment, size_t alignmentOffset, const char* pName, int flags, unsigned debugFlags, const char* file, int line);
+//
+// DBJ: requiring the operator new overloads confuses the issue
+// as it is not necessary
+
+namespace eastl { 
+
+	extern "C" {
+		void* user_defined_alloc(
+			size_t size,
+			const char* pName,
+			int flags,
+			unsigned debugFlags,
+			const char* file,
+			int line
+		) noexcept;
+
+		void* user_defined_alloc_aligned (
+			size_t size, size_t alignment, size_t alignmentOffset,
+			const char* pName,
+			int flags, unsigned debugFlags,
+			const char* file, int line
+		) noexcept;
+
+		void user_defined_deallocate(void*) noexcept;
+	} // "C" 
+
+// DBJ: deallocate() was not required by user, just allocate
+// that was a design error. deallocation mechanism must match the allocation mechanism
+// for example alligned malloc must be matched with alligned free
+// thus we will impose it onto the users to provide the following
+// to be used from the default allocator
+
+// DBJ: the change in mechanism above make it much easier for users to provide
+// context specific alloca/dealloc 
+// This makes the original mechanism somewhat redundant?
+// TODO: investigate if it can be removed
+
+// dbj no more --> EASTL_DLL #  endif
+
+// DBJ: we will simply use user defined allocation / deallocation inline functions
+
+
+	inline allocator::allocator(const char* EASTL_NAME(pName))
+	{
 #  if EASTL_NAME_ENABLED
-                mpName = pName ? pName : EASTL_ALLOCATOR_DEFAULT_NAME;
+		mpName = pName ? pName : EASTL_ALLOCATOR_DEFAULT_NAME;
 #  endif
-        }
+	}
 
 
-        inline allocator::allocator(const allocator& EASTL_NAME(alloc))
-        {
+	inline allocator::allocator(const allocator& EASTL_NAME(alloc))
+	{
 #  if EASTL_NAME_ENABLED
-                mpName = alloc.mpName;
+		mpName = alloc.mpName;
 #  endif
-        }
+	}
 
 
-        inline allocator::allocator(const allocator&, const char* EASTL_NAME(pName))
-        {
+	inline allocator::allocator(const allocator&, const char* EASTL_NAME(pName))
+	{
 #  if EASTL_NAME_ENABLED
-                mpName = pName ? pName : EASTL_ALLOCATOR_DEFAULT_NAME;
+		mpName = pName ? pName : EASTL_ALLOCATOR_DEFAULT_NAME;
 #  endif
-        }
+	}
 
 
-        inline allocator& allocator::operator=(const allocator& EASTL_NAME(alloc))
-        {
+	inline allocator& allocator::operator=(const allocator& EASTL_NAME(alloc))
+	{
 #  if EASTL_NAME_ENABLED
-                mpName = alloc.mpName;
+		mpName = alloc.mpName;
 #  endif
-            return *this;
-        }
+		return *this;
+	}
 
 
-        inline const char* allocator::get_name() const
-        {
+	inline const char* allocator::get_name() const
+	{
 #  if EASTL_NAME_ENABLED
-                return mpName;
+		return mpName;
 #  else
-                return EASTL_ALLOCATOR_DEFAULT_NAME;
+		return EASTL_ALLOCATOR_DEFAULT_NAME;
 #  endif
-        }
+	}
 
 
-        inline void allocator::set_name(const char* EASTL_NAME(pName))
-        {
+	inline void allocator::set_name(const char* EASTL_NAME(pName))
+	{
 #  if EASTL_NAME_ENABLED
-                mpName = pName;
+		mpName = pName;
 #  endif
-        }
+	}
 
-
-        inline void* allocator::allocate(size_t n, int flags)
-        {
+	// DBJ: allocation with no allignment
+	inline void* allocator::allocate(size_t size_, int flags)
+	{
 #  if EASTL_NAME_ENABLED
 #    define pName mpName
 #  else
 #    define pName EASTL_ALLOCATOR_DEFAULT_NAME
 #  endif
 
+#if 0
+		// DBJ: yes we can safely ignore all of this
+		// we will probably prove eastl_user_defined_allocate
+		// needs much less arguments
 #  if EASTL_DLL
-                // We currently have no support for implementing flags when 
-                // using the C runtime library operator new function. The user 
-                // can use SetDefaultAllocator to override the default allocator.
-                (void)flags;
-                return ::new char[n];
+				// We currently have no support for implementing flags when 
+				// using the C runtime library operator new function. The user 
+				// can use SetDefaultAllocator to override the default allocator.
+		(void)flags;
+		return ::new char[size_];
 #  elif (EASTL_DEBUGPARAMS_LEVEL <= 0)
-                return ::new((char*)0, flags, 0, (char*)0,        0) char[n];
+		return eastl_user_defined_allocate(size_, (char*)0, flags, 0, (char*)0, 0);
 #  elif (EASTL_DEBUGPARAMS_LEVEL == 1)
-                return ::new(   pName, flags, 0, (char*)0,        0) char[n];
+		return eastl_user_defined_allocate(size_, pName, flags, 0, (char*)0, 0);
 #  else
-                return ::new(   pName, flags, 0, __FILE__, __LINE__) char[n];
+		return eastl_user_defined_allocate(size_, pName, flags, 0, __FILE__, __LINE__);
 #  endif
-        }
+#endif // 0
+
+		// DBJ: __FILE__, __LINE__ have no much sense here
+		return user_defined_alloc(size_, pName, flags, 0, __FILE__, __LINE__);
+
+	}
 
 
-        inline void* allocator::allocate(size_t n, size_t alignment, size_t offset, int flags)
-        {
+	inline void* allocator::allocate(size_t size_, size_t alignment, size_t offset, int flags)
+	{
+#if 0
+		// DBJ: yes we can safely ignore all of this
+		// we will probably prove eastl_user_defined_allocate
+		// needs much less arguments
 #  if EASTL_DLL
-                // We have a problem here. We cannot support alignment, as we don't have access
-                // to a memory allocator that can provide aligned memory. The C++ standard doesn't
-                // recognize such a thing. The user will need to call SetDefaultAllocator to 
-                // provide an alloator which supports alignment.
-                EASTL_ASSERT(alignment <= 8); // 8 (sizeof(double)) is the standard alignment returned by operator new.
-                (void)alignment; (void)offset; (void)flags;
-                return new char[n];
+	// We have a problem here. We cannot support alignment, as we don't have access
+	// to a memory allocator that can provide aligned memory. The C++ standard doesn't
+	// recognize such a thing. The user will need to call SetDefaultAllocator to 
+	// provide an alloator which supports alignment.
+	// DBJ: that problem is mitigated now we have 
+	// eastl_user_defined_allocate
+		EASTL_ASSERT(alignment <= 8); // 8 (sizeof(double)) is the standard alignment returned by operator new.
+		(void)alignment; (void)offset; (void)flags;
+		return new char[n];
 #  elif (EASTL_DEBUGPARAMS_LEVEL <= 0)
-                return ::new(alignment, offset, (char*)0, flags, 0, (char*)0,        0) char[n];
+		return eastl_user_defined_allocate(size_, alignment, offset, (char*)0, flags, 0, (char*)0, 0);
 #  elif (EASTL_DEBUGPARAMS_LEVEL == 1)
-                return ::new(alignment, offset,    pName, flags, 0, (char*)0,        0) char[n];
+		return eastl_user_defined_allocate(size_, alignment, offset, pName, flags, 0, (char*)0, 0);
 #  else
-                return ::new(alignment, offset,    pName, flags, 0, __FILE__, __LINE__) char[n];
+		return eastl_user_defined_allocate(size_, alignment, offset, pName, flags, 0, __FILE__, __LINE__);
 #  endif
+#endif // 0
 
+		// DBJ: __FILE__, __LINE__ have no much sense here
+		return user_defined_alloc_aligned
+		(size_, alignment, offset, pName, flags, 0, __FILE__, __LINE__);
 #  undef pName  // See above for the definition of this.
-        }
+}
 
 
-        inline void allocator::deallocate(void* p, size_t)
-        {
-            delete[] (char*)p;
-        }
+	inline void allocator::deallocate(void* p, size_t)
+	{
+		user_defined_deallocate(p);
+	}
 
 
-        inline bool operator==(const allocator&, const allocator&)
-        {
-            return true; // All allocators are considered equal, as they merely use global new/delete.
-        }
+	inline bool operator==(const allocator&, const allocator&)
+	{
+		return true; // All allocators are considered equal, as they merely use global new/delete.
+	}
 
 
-        inline bool operator!=(const allocator&, const allocator&)
-        {
-            return false; // All allocators are considered equal, as they merely use global new/delete.
-        }
+	inline bool operator!=(const allocator&, const allocator&)
+	{
+		return false; // All allocators are considered equal, as they merely use global new/delete.
+	}
 
 
-    } // namespace eastl
+	} // namespace eastl
 
 
 #endif // EASTL_USER_DEFINED_ALLOCATOR
 
-
+// DBJ removed
+#if 0
 #ifdef _MSC_VER
 #  pragma warning(pop)
 #endif
+#endif // 0
 
 
 #endif // Header include guard
