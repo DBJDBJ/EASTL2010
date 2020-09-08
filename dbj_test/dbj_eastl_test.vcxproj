@@ -31,7 +31,7 @@
     <ClCompile Include="test\test_vector_map.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="custom_allocator.h" />
+    <ClInclude Include="mandatory.h" />
     <ClInclude Include="dbj_common.h" />
     <ClInclude Include="dbj_nano_synchro.h" />
   </ItemGroup>

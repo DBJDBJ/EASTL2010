@@ -44,47 +44,16 @@ if (ferror(FP_) != 0) {\
 #include "win_console.h"
 #endif
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <EASTL/internal/config.h>
 
 // alligned allocation
 #ifndef NDEBUG
 #define TEST_MALLOC_ALIGNED
 #endif
-#include "custom_allocator.h"
 
-// EASTL expects us to define these, see allocator.h line 194
-inline void* operator new[](size_t size_, const char* /* pName */,
-    int /* flags */, unsigned /* debugFlags */,
-    const char* /* file */, int /* line */)
-{
-    void* p{};
-    Alignment ali = { sizeof( dbj::word_t) };
-    Size      size = { size_ };
+// see the mandatory user delivered alloc / dealloc functions
+#include "mandatory.h"
 
-    // note: no checks whatsoever ...
-        int errc = dbj_memalign( &p,ali,size);
-     return p;
-}
-
-inline void* operator new[](size_t size_, size_t alignment_,
-    size_t /* alignmentOffset */, const char* /* pName */,
-    int /* flags */, unsigned /* debugFlags */,
-    const char* /* file */, int /* line */) {
-        // this allocator doesn't support alignment
-        EASTL_ASSERT(alignment_ <= 8);
-        void* p{};
-        Alignment ali = { alignment_ };
-        Size      size = { size_ };
-        // note: no checks whatsoever ...
-        int errc = dbj_memalign(&p, ali, size );
-        return p;
-}
 
 
 // EASTL also wants us to define this (see string.h line 197)
@@ -97,3 +66,11 @@ extern "C" inline int Vsnprintf8(char * pDestination, size_t count_ ,
     return vsnprintf(pDestination, count_ , pFormat, arguments);
 #endif
 }
+
+/*
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+*/
