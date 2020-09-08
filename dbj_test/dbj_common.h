@@ -52,7 +52,9 @@
 #endif // _KERNEL_MODE
 
 #include "EASTL/string.h"
+#include "EASTL/fixed_string.h"
 #include "EASTL/vector.h"
+#include "EASTL/fixed_vector.h"
 
 #define PROMPT(P_, S_) printf("\n%-24s%24s", P_, S_)
 #define SHOW(X_) PROMPT(#X_, X_)

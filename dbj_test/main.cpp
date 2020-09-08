@@ -5,21 +5,20 @@
 #undef SHORT_SPECIMEN
 #define ONE_MILLION 1000000
 
-static void performance_test(size_t loop_length, unsigned specimen_index_) noexcept
+template < size_t loop_length, unsigned specimen_index_ >
+static void performance_test() noexcept
 {
-// of course using small string 
-// makes very large difference in comparisons with EASTL
-	static const char* const specimen[]{
+	PROLOG;
+
+	static_assert(specimen_index_ < 2);
+
+	constexpr const char* specimen[]{
 	"Hello",
 	"Hello young fellow from the shallow, why are you so mellow?"
 	" Perhaps thy friend is a badfellow?"
 	};
-
-	PROLOG;
-
-	EASTL_ASSERT(specimen_index_ < 2);
-
-	const char* str_specimen_ = specimen[specimen_index_];
+	constexpr const char*  str_specimen_ = specimen[specimen_index_];
+	constexpr size_t str_specimen_size_  = sizeof(str_specimen_) ;
 
 	printf(VT100_LIGHT_GREEN);
 	PROMPT("specimen", str_specimen_);
@@ -51,6 +50,24 @@ static void performance_test(size_t loop_length, unsigned specimen_index_) noexc
 		sprintf_s(buff, 0xFF, "%f", seconds_(end, start));
 		PROMPT(rezult_prompt, buff);
 	};
+
+	// for fixed eastl versions
+	// we can do only small strings
+	if constexpr (specimen_index_ == 0 ) {
+		// Can hold up to a strlen of str_specimen_size_ + 1.
+		// overflow is not taken care of
+		// this uses stack and can not be very big 
+		using my_fixed_string = eastl::fixed_string<char, str_specimen_size_ + 1, false>;
+
+		// this uses stack and can not be very big 
+		using my_fixed_vector = eastl::fixed_vector< my_fixed_string, loop_length + 1, false >;
+
+		test_loop(
+			my_fixed_string{ str_specimen_ },
+			eastl::vector<my_fixed_string>{},
+			"EA STL using fixed string (seconds)"
+		);
+	}
 
 	test_loop(
 		eastl::string{ str_specimen_ },
@@ -119,8 +136,8 @@ int main(const int argc, char** argv)
 #ifndef _KERNEL_MODE
 	try {
 #endif // _KERNEL_MODE
-		performance_test(dbj_test_loop_size_, 0);
-		performance_test(dbj_test_loop_size_, 1);
+		performance_test<dbj_test_loop_size_, 0>();
+		performance_test<dbj_test_loop_size_, 1>();
 
 #ifdef OTHER_TESTS
 		eastl_test_vector();
