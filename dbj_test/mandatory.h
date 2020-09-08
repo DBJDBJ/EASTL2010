@@ -7,18 +7,13 @@
 #define _POSIX_C_SOURCE 200809L
 #endif
 
-#include "dbj_nano_synchro.h" //  dbj::lock_unlock autolock_ ;
-
 #include <stdlib.h>
-#include <stdio.h>
 #include <malloc.h>
 
-/*******************************************************************************************
-here we start definining our own alloc / dealloc functions
-NOTE: they are always required
-NOTE: yes they will be simplified
-*/
 
+//Here we start definining mandatory alloc / dealloc functions
+//NOTE: they are always required
+//NOTE: yes they will be simplified
 
 namespace eastl {
 	extern "C" {
@@ -52,7 +47,7 @@ namespace eastl {
 
 		inline void user_defined_deallocate(void* ptr_) noexcept
 		{
-			 free(ptr_);
+			free(ptr_);
 		}
 	} // "C"
 } // eastl ns

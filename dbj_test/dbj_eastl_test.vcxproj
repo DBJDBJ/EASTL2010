@@ -33,7 +33,6 @@
   <ItemGroup>
     <ClInclude Include="mandatory.h" />
     <ClInclude Include="dbj_common.h" />
-    <ClInclude Include="dbj_nano_synchro.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

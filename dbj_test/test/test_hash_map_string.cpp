@@ -8,6 +8,8 @@
 
 static void test_hash_map()
 {
+    PROLOG;
+
   eastl::hash_map<eastl::string, eastl::string> map;
   map["key1"] = "value1";
   map["key2"] = "value2";
@@ -16,6 +18,8 @@ static void test_hash_map()
 
 static void test_string()
 {
+    PROLOG;
+
   eastl::string str;
   str += "testing ";
   str += "simple ";
@@ -29,7 +33,7 @@ static void test_string()
 
 int test_hash_map_string( )
 {
-	printf("\n------------------------------------------------------\n" VT100_LIGHT_BLUE __FUNCSIG__  VT100_RESET);
+    PROLOG;
 
   test_hash_map();
   test_string();

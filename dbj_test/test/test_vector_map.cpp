@@ -446,7 +446,7 @@ static void get_allocator() {
 }
 
 int eastl_test_vector_map () {
-    printf("\n------------------------------------------------------\n" VT100_LIGHT_BLUE __FUNCSIG__  VT100_RESET);
+    PROLOG;
 
   constructor();
   assign_operator();

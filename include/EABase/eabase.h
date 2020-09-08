@@ -110,9 +110,10 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // C definition. This causes all sort of problems for C++ code, so it is
 // worked around by undefining NULL.
 
-#if defined(NULL)
-#  undef NULL
-#endif
+// DBJ : REMOVED
+//#if defined(NULL)
+//#  undef NULL
+//#endif
 
 
 // ------------------------------------------------------------------------
@@ -120,11 +121,12 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // don't want to force a global dependency on that header, so the definition
 // is duplicated here.
 
-#if defined(__cplusplus)
-#  define NULL 0
-#else
-#  define NULL ((void*)0)
-#endif
+// DBJ : REMOVED
+//#if defined(__cplusplus)
+//#  define NULL 0
+//#else
+//#  define NULL ((void*)0)
+//#endif
 
 
 // ------------------------------------------------------------------------

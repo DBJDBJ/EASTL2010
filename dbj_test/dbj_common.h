@@ -12,9 +12,14 @@
 
 /* (c) 2019-2020 by dbj.org   -- LICENSE DBJ -- https://dbj.org/license_dbj/ */
 
+#undef DBJ_STRINGIZE_
+#undef DBJ_STRINGIZE
+#define DBJ_STRINGIZE_(x) #x
+#define DBJ_STRINGIZE(x) DBJ_STRINGIZE_(x)
+
 #undef  DBJ_PERROR 
 #ifdef _DEBUG
-#define DBJ_PERROR (perror(__FILE__ " # " _CRT_STRINGIZE(__LINE__))) 
+#define DBJ_PERROR (perror(__FILE__ " # " DBJ_STRINGIZE(__LINE__))) 
 #else
 #define DBJ_PERROR
 #endif // _DEBUG
@@ -27,11 +32,27 @@
 #define _POSIX_C_SOURCE 200809L
 #endif
 
+#define PROLOG printf("\n------------------------------------------------------\n" VT100_LIGHT_BLUE __FUNCSIG__  VT100_RESET)
+
 #ifdef _WIN32
 #include "win_console.h"
 #endif
 
 #include <EASTL/internal/config.h>
 
-// see the mandatory user delivered alloc / dealloc functions
+// the mandatory user delivered alloc / dealloc functions
 #include "mandatory.h"
+
+#include <stdio.h>
+#include <time.h>
+
+#ifndef _KERNEL_MODE
+#include <string>
+#include <vector>
+#endif // _KERNEL_MODE
+
+#include "EASTL/string.h"
+#include "EASTL/vector.h"
+
+#define PROMPT(P_, S_) printf("\n%-24s%24s", P_, S_)
+#define SHOW(X_) PROMPT(#X_, X_)
