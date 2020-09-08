@@ -19,19 +19,6 @@
 #define DBJ_PERROR
 #endif // _DEBUG
 
-#undef DBJ_FERROR
-#ifdef _DEBUG
-#define DBJ_FERROR( FP_) \
-do { \
-if (ferror(FP_) != 0) {\
-	DBJ_PERROR ;\
-	clearerr_s(FP_);\
-} \
-} while(0)
-#else
-#define DBJ_FERROR( FP_ )
-#endif // _DEBUG
-
 #define SX(fmt_, x_) fprintf(stderr, "\n%s " fmt_, #x_, (x_))
 
 #ifdef __STDC_ALLOC_LIB__
@@ -46,31 +33,5 @@ if (ferror(FP_) != 0) {\
 
 #include <EASTL/internal/config.h>
 
-// alligned allocation
-#ifndef NDEBUG
-#define TEST_MALLOC_ALIGNED
-#endif
-
 // see the mandatory user delivered alloc / dealloc functions
 #include "mandatory.h"
-
-
-
-// EASTL also wants us to define this (see string.h line 197)
-extern "C" inline int Vsnprintf8(char * pDestination, size_t count_ ,
-    const char8_t* pFormat, va_list arguments) {
-#ifdef _MSC_VER
-    // return _vsnprintf(pDestination, count_ , pFormat, arguments);
-    return _vsnprintf_s(pDestination,  strlen(pDestination), count_ , pFormat, arguments);
-#else
-    return vsnprintf(pDestination, count_ , pFormat, arguments);
-#endif
-}
-
-/*
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-*/

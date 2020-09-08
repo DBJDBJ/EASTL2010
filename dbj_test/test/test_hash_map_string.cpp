@@ -29,7 +29,8 @@ static void test_string()
 
 int test_hash_map_string( )
 {
-	printf("\n" VT100_LIGHT_BLUE __FUNCSIG__  VT100_RESET);
+	printf("\n------------------------------------------------------\n" VT100_LIGHT_BLUE __FUNCSIG__  VT100_RESET);
+
   test_hash_map();
   test_string();
   return EXIT_SUCCESS;

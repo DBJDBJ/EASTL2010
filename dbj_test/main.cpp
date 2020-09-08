@@ -8,15 +8,39 @@
 #include <vector>
 #endif // _KERNEL_MODE
 
+#define PROMPT(P_, S_) printf("\n%-24s%24s", P_, S_)
+#define SHOW(X_) PROMPT(#X_, X_)
+
 #include "dbj_common.h"
-
-
 
 #include "EASTL/string.h"
 #include "EASTL/vector.h"
 
-static void performance_test(size_t loop_length, const char * str_specimen_ )
+#undef SHORT_SPECIMEN
+
+// making this larger than small size optimization (SSO) STD STL value 
+// makes very large difference in comparisons with EASTL
+static const char * const specimen[]{
+"Hello",
+"Hello young fellow from the shallow, why are you so mellow? Perhaps thy friend is the badfellow?"
+};
+
+
+static void performance_test(size_t loop_length, unsigned specimen_index_  )
 {
+
+    EASTL_ASSERT( specimen_index_ < 2 );
+
+    const char* str_specimen_ = specimen[specimen_index_];
+
+    printf("\n------------------------------------------------------\n" VT100_LIGHT_BLUE __FUNCSIG__  VT100_RESET);
+
+    printf( VT100_LIGHT_CYAN );
+    printf( "\n\nSpecimen: " VT100_LIGHT_GREEN " '%s' " VT100_LIGHT_CYAN 
+        "(length: %zd)", str_specimen_, strlen(str_specimen_));
+
+    printf("\nTest Loop length: %03.1f milions" VT100_RESET, double(loop_length) / 1000000);
+
     clock_t start{};
     clock_t end{};
 
@@ -26,8 +50,6 @@ static void performance_test(size_t loop_length, const char * str_specimen_ )
     };
 
     // EA
-
-    printf("EA STL     ");
 
     eastl::string strEA = str_specimen_;
     eastl::vector<eastl::string> vec_EA;
@@ -39,37 +61,35 @@ static void performance_test(size_t loop_length, const char * str_specimen_ )
     }
 
     end = clock();
-    printf("%f sec\n", diff_per_second(end,start) );
+
+    char buff[0xFF]{0};
+    sprintf_s( buff, 0xFF, "%f" , diff_per_second(end, start) );
+    PROMPT("EA STL seconds", buff  );
 
 
     // no std lib in kernel mode 
 #ifndef _KERNEL_MODE
     // Standard
-    printf("\nStandard STL     ");
-
-    std::string strStandard = str_specimen_;
-    std::vector<std::string> vec_Standard;
-
-    start = clock();
-    for (size_t i = 0; i < loop_length; i++)
     {
-        vec_Standard.push_back(strStandard);
+        std::string strStandard = str_specimen_;
+        std::vector<std::string> vec_Standard;
+
+        start = clock();
+        for (size_t i = 0; i < loop_length; i++)
+        {
+            vec_Standard.push_back(strStandard);
+        }
+
+        end = clock();
+        char buff[0xFF]{ 0 };
+        sprintf_s(buff, 0xFF, "%f", diff_per_second(end, start));
+        PROMPT("STD STL seconds", buff );
     }
 
-    end = clock();
-    printf("%f sec\n", diff_per_second(end, start) );
+#else  // ! _KERNEL_MODE
+    printf("\n Can not used std lib in kernel mode.");
 #endif //!  _KERNEL_MODE
 }
-
-#define SHORT_SPECIMEN
-
-// making this larger than small size optimization (SSO) value 
-// makes very large difference in comparisons with EASTL
-#ifdef SHORT_SPECIMEN
-#define DBJ_STRING_SPECIMEN "Hello"
-#else
-#define DBJ_STRING_SPECIMEN "Hello young fellow from the shallow, why are you so mellow? Perhaps thy friend is the badfellow? "
-#endif
 
 #define OTHER_TESTS
 #ifdef OTHER_TESTS
@@ -88,11 +108,9 @@ int test_malloc_aligned() noexcept ;
 
 #endif // OTHER_TESTS
 
-// EA_COMPILER_NO_EXCEPTIONS
-
 int main(const int argc, char ** argv)
 {
-    constexpr auto dbj_test_loop_size_ = 1000000 / 10;
+    constexpr auto dbj_test_loop_size_ = 1000000 * 2 ;
 
 #ifdef _WIN32
     win_enable_vt_100_and_unicode();
@@ -103,51 +121,34 @@ int main(const int argc, char ** argv)
     win_set_console_font(L"Consolas", 24);
 #endif
 
+    printf(VT100_RESET "\n\n" );
+
 #ifdef _KERNEL_MODE
-    printf(VT100_LIGHT_RED "\n\n******************* KERNEL MODE ****************************\n\n" VT100_RESET);
+    SHOW(_KERNEL_MODE);
 #endif // _KERNEL_MODE
 
-#ifdef EA_COMPILER_NO_EXCEPTIONS
-    SX(EA_COMPILER_NO_EXCEPTIONS);
-#endif
-
-    printf(VT100_LIGHT_GREEN);
 #ifdef __clang__
-    printf("\nCLANG ");
-    printf("\n __VERSION__ : %d", __VERSION__);
+    SHOW(__VERSION__);
 #else
-    printf("\nCL    ");
-    printf("\n_MSC_FULL_VER : %d", _MSC_FULL_VER);
+    SHOW(_CRT_STRINGIZE(_MSC_FULL_VER));
 #endif
 
-    printf("\n% s[version % s]  \n__cplusplus: %lu ", argv[0], __TIMESTAMP__, __cplusplus);
+    SHOW( _CRT_STRINGIZE( __cplusplus )  );
+    SHOW(__TIMESTAMP__);
 
 #ifdef _DEBUG
-    printf("\tDEBUG build");
+    SHOW(_CRT_STRINGIZE(_DEBUG));
 #else
-    printf("\tRELEASE build");
+    SHOW(_CRT_STRINGIZE(NDEBUG));
 #endif
     printf(VT100_RESET);
-
-
-    printf(VT100_LIGHT_GREEN "\nSpecimen: \"%s\" (length: %zd)", DBJ_STRING_SPECIMEN, strlen(DBJ_STRING_SPECIMEN));
-    printf("\nTest Loop length: %03.1f milions" VT100_RESET, double(dbj_test_loop_size_) / 1000000 );
 
 #ifndef _KERNEL_MODE
     try {
 #endif // _KERNEL_MODE
-        performance_test(dbj_test_loop_size_, DBJ_STRING_SPECIMEN);
-#ifndef _KERNEL_MODE
-    }
-    catch (std::exception& x_)
-    {
-        printf("\nstd::exception \"%s\"", x_.what() );
-    }
-    catch (...)
-    {
-        printf("\nUnknown exception ...?");
-    }
-#endif // _KERNEL_MODE
+        performance_test(dbj_test_loop_size_, 0); 
+        performance_test(dbj_test_loop_size_, 1);
+
 
 #ifdef OTHER_TESTS
 #ifdef TEST_MALLOC_ALIGNED
@@ -161,6 +162,18 @@ int main(const int argc, char ** argv)
     test_hash_map_string();
 
 #endif // OTHER_TESTS
+
+#ifndef _KERNEL_MODE
+    }
+    catch (std::exception& x_)
+    {
+        printf("\nstd::exception \"%s\"", x_.what());
+    }
+    catch (...)
+    {
+        printf("\nUnknown exception ...?");
+    }
+#endif // _KERNEL_MODE
 
     printf(VT100_LIGHT_GREEN "\n\nDone ...\n\n" VT100_RESET);
 

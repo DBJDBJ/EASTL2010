@@ -198,9 +198,20 @@ const eastl_size_t EASTL_STRING_INITIAL_CAPACITY = 8;
 // values but act more efficiently if implemented via the C99 style.
 
 extern "C" {
-    // extern int Vsnprintf8(char8_t* pDestination, size_t n, const char8_t* pFormat, va_list arguments);
-    // nicked from EASTL 2020
-    extern int Vsnprintf8(char* pDestination, size_t n, const char* pFormat, va_list arguments);
+//    extern int Vsnprintf8(char* pDestination, size_t n, const char* pFormat, va_list arguments);
+// DBJ: implemented here
+// first arg  is char not char8_t
+inline int Vsnprintf8
+(char * pDestination, size_t count_ , const char8_t* pFormat, va_list arguments) 
+{
+#ifdef _MSC_VER
+    // return _vsnprintf(pDestination, count_ , pFormat, arguments);
+    return _vsnprintf_s(pDestination,  strlen(pDestination), count_ , pFormat, arguments);
+#else
+    return vsnprintf(pDestination, count_ , pFormat, arguments);
+#endif
+}
+
     extern int Vsnprintf16(char16_t* pDestination, size_t n, const char16_t* pFormat, va_list arguments);
     extern int Vsnprintf32(char32_t* pDestination, size_t n, const char32_t* pFormat, va_list arguments);
 }
