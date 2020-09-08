@@ -29,9 +29,62 @@ No other changes to any project properties have been done. In any case please lo
 
 ### Noexcept Allocators
 
-This is *very* important. During last few years, inability to do this in the std lib [breaks the whole C++ community](https://thephd.github.io/freestanding-noexcept-allocators-vector-memory-hole) into two fractions. The ones anti std lib and the ones pro std lib. The rift which probably will not heal. EASTL 2020 is one known example from the half which is not using std lib. When EASTL 2010 was conceived, that was perhaps not clearly understood, but fortunately "the need for speed" has born the different allocator mechanism.
+During last few years, inability to have noexcept allocators in the std lib [breaks the whole C++ community](https://thephd.github.io/freestanding-noexcept-allocators-vector-memory-hole) into two fractions. The ones anti std lib and the ones pro std lib. The rift which probably will not heal. 
 
-We simply do not care. When using this lib, please think **first** of your custom allocator to be used with this lib. EASTL allocator synopsis is this:
+EASTL 2020 is one known example from the half which is not using std lib. When EASTL 2010 was conceived, that was perhaps not clearly understood, but fortunately "the need for speed" has born the different allocator mechanism.
+
+We have considerably simplified the allocation / deallocation mechanism now available to users. All you have to do is to provide implementations to three functions. Here is the working example:
+
+```cpp
+namespace eastl {
+	extern "C" {
+
+		// EASTL expects us to define these, see allocator.h 
+		inline void* user_defined_alloc(
+			size_t size_,
+			const char* pName,
+			int flags,
+			unsigned debugFlags,
+			const char* file,
+			int line
+		) noexcept
+		{
+			// note: no checks whatsoever ...
+			return malloc(size_);
+		}
+
+		// alligned allocation
+		inline void* user_defined_alloc_aligned(
+			size_t size_,
+			size_t alignment_,
+			size_t alignmentOffset,
+			const char* pName,
+			int flags,
+			unsigned debugFlags,
+			const char* file,
+			int line
+		) noexcept
+		{
+			// no alignment
+			// note: no checks whatsoever ...
+			return malloc(size_);
+		}
+
+		inline void user_defined_deallocate(void* ptr_) noexcept
+		{
+			free(ptr_);
+		}
+	} // "C"
+} // eastl ns
+```
+
+Things to note
+
+1. there is a design error above. aligned alloc has no aligned delete. 
+   1. we have solved it by not doing actual aligned alloc.
+2. these functions signatures will be much simplified
+
+When using this lib, please think **first** of functions above, to be implemented. Second you can develop your own custom allocator to be used with this lib. EASTL allocator synopsis is this:
 
 ```cpp
 namespace dbj
@@ -54,7 +107,7 @@ class allocator
     allocator* GetDefaultAllocator(); 
 }
 ```
-Look into `./custom/custom_allocator.h` for an example on how to develop and install yours. Note: default allocator is so default it is best avoided. It uses new and delete operators.
+Look into `./custom/custom_allocator.h` for an example on how to develop and install yours. 
 
 ### EASTL_ALLOCATOR_EXPLICIT
 

@@ -138,7 +138,7 @@ namespace eastl
 		return EASTLAllocatorDefault(); // For the built-in allocator EASTLAllocatorType, we happen to already have a function for returning the default allocator instance, so we provide it.
 	}
 
-
+#if 0
 	/// default_allocfreemethod
 	///
 	/// Implements a default allocfreemethod which uses the default global allocator.
@@ -157,6 +157,7 @@ namespace eastl
 			return EASTLAlloc(*pAllocator, n);
 	}
 
+#endif // 0
 
 	/// allocate_memory
 	///
@@ -172,6 +173,7 @@ namespace eastl
 			return EASTLAlloc(a, n);
 		return EASTLAllocAligned(a, n, alignment, alignmentOffset);
 	}
+
 
 } // namespace eastl
 
