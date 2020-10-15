@@ -1,6 +1,6 @@
+<h1>This repo is deprected. Please goto https://github.com/DBJDBJ/EASTL2020CORE</h1>
 
-
-<h1>DBJ EASTL 2010</h1>
+<h2>DBJ EASTL 2010</h2>
 
 - [1. Apologies first](#1-apologies-first)
 - [2. Why using EASTL 2010 in 2020](#2-why-using-eastl-2010-in-2020)
